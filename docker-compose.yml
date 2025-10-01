@@ -1,35 +1,6 @@
 version: '3.9'
 
 services:
-    node:
-        build: .
-        container_name: api
-        ports:
-            - '${PORT}:3000'
-        volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
-        depends_on:
-            - postgres
-            - mongo
-            - redis
-        environment:
-            PORT: ${PORT}
-            POSTGRES_HOST: postgres
-            POSTGRES_USER: ${POSTGRES_USER}
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-            POSTGRES_DB: ${POSTGRES_DB}
-            POSTGRES_PORT: ${POSTGRES_PORT}
-
-            MONGO_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_DB}?authSource=admin
-            MONGO_USER: ${MONGO_USER}
-            MONGO_PASSWORD: ${MONGO_PASSWORD}
-            MONGO_DB: ${MONGO_DB}
-            MONGO_PORT: ${MONGO_PORT}
-
-            REDIS_HOST: redis
-            REDIS_PORT: ${REDIS_PORT}
-            REDIS_PASSWORD: ${REDIS_PASSWORD}
     postgres:
         image: postgres:17
         container_name: postgres

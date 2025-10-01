@@ -6,6 +6,6 @@ export class AppController {
 
 	@Get()
 	getHello(): string {
-		return 'API is running 123456 789'
+		return 'Yes, it is running -> Iris Chatbot API'
 	}
 }
