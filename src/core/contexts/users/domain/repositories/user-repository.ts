@@ -1,12 +1,16 @@
-import { UserEntity } from '../entities/user-entity'
+import { SessionStatus, UserEntity } from '../entities/user-entity'
 
 export abstract class UserRepository {
-	abstract create(user: UserEntity): Promise<void>
+	public abstract readonly users: UserEntity[]
+	abstract create(user: UserEntity): Promise<UserEntity>
 	abstract findByEmail(email: string): Promise<UserEntity | null>
 	abstract findById(id: string): Promise<UserEntity | null>
-	abstract update(user: UserEntity): Promise<void>
+	abstract update(user: UserEntity): Promise<UserEntity>
 	abstract delete(id: string): Promise<void>
-	abstract updateSessionStatus(user: UserEntity): Promise<void>
-	abstract inactive(user: UserEntity): Promise<void>
-	abstract active(user: UserEntity): Promise<void>
+	abstract updateSessionStatus(
+		id: string,
+		sessionStatus: SessionStatus,
+	): Promise<UserEntity>
+	abstract inactive(id: string): Promise<void>
+	abstract active(id: string): Promise<void>
 }

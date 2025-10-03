@@ -26,6 +26,7 @@
 			"@/*": ["./src/*"],
 			"@config/*": ["src/core/infra/config/*"],
 			"@shared/*": ["src/core/shared/*"]
-		}
+		},
+		"types": ["node", "vitest/globals"]
 	}
 }

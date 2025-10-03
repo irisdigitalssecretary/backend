@@ -1,7 +1,9 @@
-import { Hasher as IHasher } from '@/core/shared/domain/infra/services/hasher'
+import { Hasher as IHasher } from '@shared/domain/infra/services/hasher'
 import bcrypt from 'bcrypt'
+import { Injectable } from '@nestjs/common'
 
-export class Hasher implements IHasher {
+@Injectable()
+export class BcryptHasher implements IHasher {
 	public readonly HASH_NUMBER = 10
 
 	public hash(value: string): Promise<string> {

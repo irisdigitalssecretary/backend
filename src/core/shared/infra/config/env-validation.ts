@@ -26,6 +26,9 @@ export const envSchema = z.object({
 	REDIS_HOST: z.string().default('localhost'),
 	REDIS_PORT: z.coerce.number().default(6379),
 	REDIS_PASSWORD: z.string(),
+
+	//App
+	APP_ENV: z.string().default('development'),
 })
 
 export const env = envSchema.parse(process.env)

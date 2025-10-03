@@ -1,4 +1,5 @@
 import { ValueObject } from '../base/value-object'
+import { InvalidEmailError } from '../errors/invalid-email'
 
 export class Email extends ValueObject<{ value: string }> {
 	public static readonly REGEX_PATTERN =
@@ -13,16 +14,14 @@ export class Email extends ValueObject<{ value: string }> {
 	}
 
 	public static create(email: string): Email {
-		if (!this.validate(email)) {
-			throw new Error(`Invalid email ${email ? `: ${email}` : ''}`)
-		}
+		this.validate(email)
 
 		return new Email(email)
 	}
 
-	private static validate(email: string): boolean {
-		if (!email) return false
-
-		return this.REGEX_PATTERN.test(String(email).toLowerCase())
+	private static validate(email: string): void {
+		if (!this.REGEX_PATTERN.test(String(email).toLowerCase())) {
+			throw new InvalidEmailError()
+		}
 	}
 }
