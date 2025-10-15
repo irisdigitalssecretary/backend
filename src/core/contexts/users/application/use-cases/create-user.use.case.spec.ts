@@ -31,20 +31,20 @@ describe('CreateUserUseCase', () => {
 		}
 		const result = await createUserUseCase.execute(data)
 
+		const user = userRepository.users[0]
+
 		expect(result.isRight()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserEntity)
 		expect(userRepository.users.length).toBe(1)
-
-		const user = await userRepository.findByEmail(data.email)
 		expect(user).toBeInstanceOf(UserEntity)
 		expect(user?.props.password).toBeInstanceOf(PasswordHash)
-		expect(user?.props.password.props.hashedPassword).not.toBe(
+		expect(user?.props.password?.props.hashedPassword).not.toBe(
 			data.password,
 		)
 		void expect(
 			hasher.compare(
 				data.password,
-				user?.props.password.props.hashedPassword ?? '',
+				user?.props.password?.props.hashedPassword ?? '',
 			),
 		).resolves.toBe(true)
 	})

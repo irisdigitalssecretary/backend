@@ -33,12 +33,14 @@ export class InMemoryUserRepository implements UserRepository {
 		})
 	}
 
-	public update(user: UserEntity): Promise<UserEntity> {
+	public update(userToUpdate: UserEntity): Promise<UserEntity> {
 		return new Promise((resolve) => {
 			const index = this.users.findIndex(
-				(user) => user.props.id === user.props.id,
+				(user) => userToUpdate.props.id === user.props.id,
 			)
-			this.users[index] = user
+
+			this.users[index] = userToUpdate
+
 			resolve(this.users[index])
 		})
 	}

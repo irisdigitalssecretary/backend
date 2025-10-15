@@ -19,7 +19,7 @@ export interface UserEntityProps {
 	id?: string
 	name: string
 	email: Email
-	password: PasswordHash
+	password?: PasswordHash
 	sessionStatus?: SessionStatus
 	status?: UserStatus
 }
