@@ -15,12 +15,5 @@ export class FindManyUsersUseCase {
 	public async execute(
 		props: FindManyUsersUseCaseRequest,
 	): Promise<FindManyUsersUseCaseResponse> {
-		const user = await this.userRepository.findByUuid(props.uuid)
-
-		if (!user) {
-			return left(new UserNotFoundError())
-		}
-
-		return right(user)
-	}
+		cons
 }
