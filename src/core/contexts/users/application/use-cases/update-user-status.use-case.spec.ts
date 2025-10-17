@@ -38,12 +38,9 @@ describe('UpdateUserStatusUseCase', () => {
 	})
 
 	it('should be able to update the user status by id', async () => {
-		const uuid = '123e4567-e89b-12d3-a456-426614174000'
-
 		const user = await userRepository.create(
 			await makeUserEntity(
 				{
-					uuid,
 					name: 'John Doe',
 					email: 'john.doe@example.com',
 					password: 'Test@123',
@@ -62,6 +59,6 @@ describe('UpdateUserStatusUseCase', () => {
 		expect(result.isRight()).toBe(true)
 		expect(userRepository.users.length).toBe(1)
 		expect(userRepository.users[0].props.id).toBe(user.props.id)
-		expect(userRepository.users[0].props.status).toBe(UserStatus.INACTIVE)
+		expect(userRepository.users[0].status).toBe(UserStatus.INACTIVE)
 	})
 })

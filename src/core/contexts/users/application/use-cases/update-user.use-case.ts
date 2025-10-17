@@ -71,7 +71,7 @@ export class UpdateUserUseCase {
 		if (props.password && props.oldPassword) {
 			isOldPasswordValid = await this.hasher.compare(
 				props.oldPassword,
-				userToUpdate.props.password?.props.hashedPassword ?? '',
+				userToUpdate.password ?? '',
 			)
 		}
 

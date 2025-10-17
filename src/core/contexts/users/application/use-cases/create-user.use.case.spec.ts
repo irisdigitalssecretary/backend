@@ -5,7 +5,6 @@ import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserEntity } from '../../domain/entities/user-entity'
 import { UserEmailExistsError } from '../../domain/errors/user-email-already-exists'
-import { PasswordHash } from '@shared/domain/value-objects/password-hash'
 import { InvalidEmailError } from '@shared/domain/errors/invalid-email'
 import { InvalidPasswordError } from '@shared/domain/errors/invalid-password'
 
@@ -37,15 +36,9 @@ describe('CreateUserUseCase', () => {
 		expect(result.value).toBeInstanceOf(UserEntity)
 		expect(userRepository.users.length).toBe(1)
 		expect(user).toBeInstanceOf(UserEntity)
-		expect(user?.props.password).toBeInstanceOf(PasswordHash)
-		expect(user?.props.password?.props.hashedPassword).not.toBe(
-			data.password,
-		)
+		expect(user?.password).not.toBe(data.password)
 		void expect(
-			hasher.compare(
-				data.password,
-				user?.props.password?.props.hashedPassword ?? '',
-			),
+			hasher.compare(data.password, user?.password ?? ''),
 		).resolves.toBe(true)
 	})
 

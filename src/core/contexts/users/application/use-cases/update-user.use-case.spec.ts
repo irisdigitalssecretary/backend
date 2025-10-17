@@ -81,8 +81,8 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(userRepository.users.length).toBe(2)
-		expect(userRepository.users[0].props.email.value).toBe(emailToUpdate)
-		expect(userRepository.users[0].props.id).toBeDefined()
+		expect(userRepository.users[0].email).toBe(emailToUpdate)
+		expect(userRepository.users[0].id).toBeDefined()
 
 		const result = await updateUserUseCase.execute(
 			{
@@ -134,11 +134,7 @@ describe('UpdateUserUseCase', () => {
 				result.value.statusCode === 401,
 		).toBe(true)
 		void expect(
-			hasher.compare(
-				'Test@123',
-				userRepository.users[0].props.password?.props.hashedPassword ??
-					'',
-			),
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
 	})
 
@@ -174,11 +170,7 @@ describe('UpdateUserUseCase', () => {
 				result.value.statusCode === 401,
 		).toBe(true)
 		void expect(
-			hasher.compare(
-				'Test@123',
-				userRepository.users[0].props.password?.props.hashedPassword ??
-					'',
-			),
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
 	})
 
@@ -214,11 +206,7 @@ describe('UpdateUserUseCase', () => {
 				result.value.statusCode === 400,
 		).toBe(true)
 		void expect(
-			hasher.compare(
-				'Test@123',
-				userRepository.users[0].props.password?.props.hashedPassword ??
-					'',
-			),
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
 	})
 
@@ -254,11 +242,7 @@ describe('UpdateUserUseCase', () => {
 				result.value.statusCode === 400,
 		).toBe(true)
 		void expect(
-			hasher.compare(
-				'Test@123',
-				userRepository.users[0].props.password?.props.hashedPassword ??
-					'',
-			),
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
 	})
 
@@ -294,11 +278,7 @@ describe('UpdateUserUseCase', () => {
 				result.value.statusCode === 400,
 		).toBe(true)
 		void expect(
-			hasher.compare(
-				'Test@123',
-				userRepository.users[0].props.password?.props.hashedPassword ??
-					'',
-			),
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
 	})
 
@@ -334,11 +314,7 @@ describe('UpdateUserUseCase', () => {
 				result.value.statusCode === 400,
 		).toBe(true)
 		void expect(
-			hasher.compare(
-				'Test@123',
-				userRepository.users[0].props.password?.props.hashedPassword ??
-					'',
-			),
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
 	})
 
@@ -374,11 +350,7 @@ describe('UpdateUserUseCase', () => {
 				result.value.statusCode === 400,
 		).toBe(true)
 		void expect(
-			hasher.compare(
-				'Test@123',
-				userRepository.users[0].props.password?.props.hashedPassword ??
-					'',
-			),
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
 	})
 
@@ -414,11 +386,7 @@ describe('UpdateUserUseCase', () => {
 				result.value.statusCode === 400,
 		).toBe(true)
 		void expect(
-			hasher.compare(
-				'Test@123',
-				userRepository.users[0].props.password?.props.hashedPassword ??
-					'',
-			),
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
 	})
 
@@ -467,20 +435,15 @@ describe('UpdateUserUseCase', () => {
 
 		expect(result.isRight()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserEntity)
-		expect(userUpdated.props.name).toBe(data.name)
-		expect(userUpdated.props.email.value).toBe(data.email)
-		expect(userUpdated.props.password?.props.hashedPassword).not.toBe(
-			user.props.password?.props.hashedPassword,
-		)
+		expect(userUpdated.name).toBe(data.name)
+		expect(userUpdated.email).toBe(data.email)
+		expect(userUpdated.password).not.toBe(user.password)
 
 		void expect(
-			hasher.compare(
-				data.password,
-				userUpdated.props.password?.props.hashedPassword ?? '',
-			),
+			hasher.compare(data.password, userUpdated.password ?? ''),
 		).resolves.toBe(true)
 
-		expect(userUpdated.props.sessionStatus).toBe(data.sessionStatus)
-		expect(userUpdated.props.status).toBe(data.status)
+		expect(userUpdated.sessionStatus).toBe(data.sessionStatus)
+		expect(userUpdated.status).toBe(data.status)
 	})
 })

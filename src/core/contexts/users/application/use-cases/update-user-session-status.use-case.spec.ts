@@ -64,7 +64,7 @@ describe('UpdateUserSessionStatusUseCase', () => {
 		expect(result.isRight()).toBe(true)
 		expect(userRepository.users.length).toBe(1)
 		expect(userRepository.users[0].props.id).toBe(user.props.id)
-		expect(userRepository.users[0].props.sessionStatus).toBe(
+		expect(userRepository.users[0].sessionStatus).toBe(
 			SessionStatus.OFFLINE,
 		)
 	})

@@ -61,8 +61,8 @@ describe('FindUserByIdUseCase', () => {
 
 		const user = result.value
 		expect(user).toBeInstanceOf(UserEntity)
-		expect(user.props.uuid).toBe(uuid)
-		expect(user.props.email.value).toBe('john.doe@example.com')
-		expect(user.props.name).toBe('John Doe')
+		expect(user.uuid).toBe(uuid)
+		expect(user.email).toBe('john.doe@example.com')
+		expect(user.name).toBe('John Doe')
 	})
 })
