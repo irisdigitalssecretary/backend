@@ -472,12 +472,14 @@ describe('UpdateUserUseCase', () => {
 		expect(userUpdated.props.password?.props.hashedPassword).not.toBe(
 			user.props.password?.props.hashedPassword,
 		)
+
 		void expect(
 			hasher.compare(
 				data.password,
 				userUpdated.props.password?.props.hashedPassword ?? '',
 			),
 		).resolves.toBe(true)
+
 		expect(userUpdated.props.sessionStatus).toBe(data.sessionStatus)
 		expect(userUpdated.props.status).toBe(data.status)
 	})

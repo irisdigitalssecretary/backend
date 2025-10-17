@@ -33,6 +33,13 @@ export class InMemoryUserRepository implements UserRepository {
 		})
 	}
 
+	public findByUuid(uuid: string): Promise<UserEntity | null> {
+		return new Promise((resolve) => {
+			const user = this.users.find((user) => user.props.uuid === uuid)
+			resolve(user ?? null)
+		})
+	}
+
 	public update(userToUpdate: UserEntity): Promise<UserEntity> {
 		return new Promise((resolve) => {
 			const index = this.users.findIndex(
@@ -64,19 +71,11 @@ export class InMemoryUserRepository implements UserRepository {
 		})
 	}
 
-	public inactive(id: string): Promise<void> {
+	public updateStatus(id: string, status: UserStatus): Promise<UserEntity> {
 		return new Promise((resolve) => {
 			const index = this.users.findIndex((user) => user.props.id === id)
-			this.users[index].props.status = UserStatus.INACTIVE
-			resolve()
-		})
-	}
-
-	public active(id: string): Promise<void> {
-		return new Promise((resolve) => {
-			const index = this.users.findIndex((user) => user.props.id === id)
-			this.users[index].props.status = UserStatus.ACTIVE
-			resolve()
+			this.users[index].props.status = status
+			resolve(this.users[index])
 		})
 	}
 }

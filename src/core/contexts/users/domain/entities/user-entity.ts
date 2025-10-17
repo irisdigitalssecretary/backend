@@ -17,6 +17,7 @@ export enum UserStatus {
 
 export interface UserEntityProps {
 	id?: string
+	uuid?: string
 	name: string
 	email: Email
 	password?: PasswordHash
