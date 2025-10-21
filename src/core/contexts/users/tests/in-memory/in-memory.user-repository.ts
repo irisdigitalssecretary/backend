@@ -1,17 +1,38 @@
-import { randomUUID } from 'node:crypto'
+import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
 import {
 	SessionStatus,
 	UserEntity,
 	UserStatus,
 } from '../../domain/entities/user-entity'
-import { UserRepository } from '../../domain/repositories/user-repository'
+import {
+	UserFilters,
+	UserRepository,
+} from '../../domain/repositories/user-repository'
+import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
 
 export class InMemoryUserRepository implements UserRepository {
 	public readonly users: UserEntity[] = []
 
+	private getFieldValue(user: UserEntity, field: keyof UserFilters): string {
+		switch (field) {
+			case 'name':
+				return user.props.name
+			case 'email':
+				return user.props.email.value
+			case 'phone':
+				return user.props.phone || ''
+			case 'status':
+				return user.props.status || UserStatus.ACTIVE
+			case 'sessionStatus':
+				return user.props.sessionStatus || SessionStatus.OFFLINE
+			default:
+				return ''
+		}
+	}
+
 	public create(user: UserEntity): Promise<UserEntity> {
 		return new Promise((resolve) => {
-			user.props.id = randomUUID()
+			user.props.id = user.props.id || Math.floor(Math.random() * 100)
 			this.users.push(user)
 			resolve(user)
 		})
@@ -26,7 +47,7 @@ export class InMemoryUserRepository implements UserRepository {
 		})
 	}
 
-	public findById(id: string): Promise<UserEntity | null> {
+	public findById(id: number): Promise<UserEntity | null> {
 		return new Promise((resolve) => {
 			const user = this.users.find((user) => user.props.id === id)
 			resolve(user ?? null)
@@ -52,7 +73,7 @@ export class InMemoryUserRepository implements UserRepository {
 		})
 	}
 
-	public delete(id: string): Promise<void> {
+	public delete(id: number): Promise<void> {
 		return new Promise((resolve) => {
 			const index = this.users.findIndex((user) => user.props.id === id)
 			this.users.splice(index, 1)
@@ -61,7 +82,7 @@ export class InMemoryUserRepository implements UserRepository {
 	}
 
 	public updateSessionStatus(
-		id: string,
+		id: number,
 		sessionStatus: SessionStatus,
 	): Promise<UserEntity> {
 		return new Promise((resolve) => {
@@ -71,11 +92,102 @@ export class InMemoryUserRepository implements UserRepository {
 		})
 	}
 
-	public updateStatus(id: string, status: UserStatus): Promise<UserEntity> {
+	public updateStatus(id: number, status: UserStatus): Promise<UserEntity> {
 		return new Promise((resolve) => {
 			const index = this.users.findIndex((user) => user.props.id === id)
 			this.users[index].props.status = status
 			resolve(this.users[index])
+		})
+	}
+
+	public findManyByOffsetPagination(
+		props: FindManyOptions<UserFilters, OffsetPagination>,
+	): Promise<UserEntity[]> {
+		return new Promise((resolve) => {
+			const { filters } = props
+
+			let users = this.users.filter((user) => {
+				let condition = true
+
+				if (filters?.name) {
+					condition = !!(
+						condition &&
+						user.props.name
+							.toLowerCase()
+							.includes(filters.name.toLowerCase())
+					)
+				}
+				if (filters?.email) {
+					condition = !!(
+						condition &&
+						user.props.email.value
+							.toLowerCase()
+							.includes(filters.email.toLowerCase())
+					)
+				}
+				if (filters?.phone) {
+					condition = !!(
+						condition &&
+						user.props.phone
+							?.toLowerCase()
+							.includes(filters.phone.toLowerCase())
+					)
+				}
+				if (filters?.status) {
+					condition = !!(
+						condition && user.props.status === filters.status
+					)
+				}
+				if (filters?.sessionStatus) {
+					condition = !!(
+						condition &&
+						user.props.sessionStatus === filters.sessionStatus
+					)
+				}
+
+				return condition
+			})
+
+			if (props.orderBy?.length) {
+				users = users.sort((a, b) => {
+					for (const order of props.orderBy!) {
+						let compareResult = 0
+
+						const fieldA = this.getFieldValue(a, order.field)
+						const fieldB = this.getFieldValue(b, order.field)
+
+						if (fieldA && fieldB) {
+							if (
+								typeof fieldA === 'string' &&
+								typeof fieldB === 'string'
+							) {
+								compareResult = String(fieldA)
+									.toLowerCase()
+									.localeCompare(
+										String(fieldB).toLowerCase(),
+										'pt-BR',
+									)
+							}
+						}
+
+						if (compareResult !== 0) {
+							return order.direction === 'desc'
+								? -compareResult
+								: compareResult
+						}
+					}
+
+					return 0
+				})
+			}
+
+			users = users.slice(
+				props.pagination?.offset,
+				(props.pagination?.offset || 0) +
+					(props.pagination?.limit || 10),
+			)
+
+			resolve(users)
 		})
 	}
 }

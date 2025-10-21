@@ -8,7 +8,7 @@ import { PasswordHash } from '@shared/domain/value-objects/password-hash'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 
 interface MakeUserEntityProps {
-	id?: string
+	id?: number
 	uuid?: string
 	name: string
 	email: string

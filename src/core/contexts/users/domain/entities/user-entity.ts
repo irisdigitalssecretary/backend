@@ -16,13 +16,14 @@ export enum UserStatus {
 }
 
 export interface UserEntityProps {
-	id?: string
+	id?: number
 	uuid?: string
 	name: string
 	email: Email
 	password?: PasswordHash
 	sessionStatus?: SessionStatus
 	status?: UserStatus
+	phone?: string
 }
 
 export class UserEntity extends Entity<UserEntityProps> {
@@ -72,6 +73,10 @@ export class UserEntity extends Entity<UserEntityProps> {
 
 	public get inactive(): boolean {
 		return this.status === UserStatus.INACTIVE
+	}
+
+	public get phone(): string {
+		return this.props.phone || ''
 	}
 
 	public static create(
