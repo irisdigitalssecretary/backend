@@ -53,7 +53,7 @@ describe('DeleteUserByIdUseCase', () => {
 		expect(userRepository.users.length).toBe(1)
 
 		const result = await deleteUserByIdUseCase.execute({
-			id: user.props.id as string,
+			id: user.props.id as number,
 		})
 
 		expect(result.isRight()).toBe(true)

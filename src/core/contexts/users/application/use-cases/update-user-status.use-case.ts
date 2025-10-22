@@ -4,7 +4,7 @@ import { UserNotFoundError } from '../../domain/errors/user-not-found'
 import { Either, left, right } from '@/core/shared/domain/base/either'
 
 interface UpdateUserStatusUseCaseRequest {
-	id: string
+	id: number
 	status: UserStatus
 }
 

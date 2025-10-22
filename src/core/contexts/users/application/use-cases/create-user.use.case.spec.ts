@@ -7,6 +7,7 @@ import { UserEntity } from '../../domain/entities/user-entity'
 import { UserEmailExistsError } from '../../domain/errors/user-email-already-exists'
 import { InvalidEmailError } from '@shared/domain/errors/invalid-email'
 import { InvalidPasswordError } from '@shared/domain/errors/invalid-password'
+import { InvalidPhoneError } from '@/core/shared/domain/errors/invalid-phone'
 
 describe('CreateUserUseCase', () => {
 	let hasher: Hasher
@@ -81,6 +82,31 @@ describe('CreateUserUseCase', () => {
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(userRepository.users.length).toBe(0)
+	})
+
+	it('should not be able to create a user with an password with more than 16 characters', async () => {
+		const result = await createUserUseCase.execute({
+			name: 'John Doe',
+			email: 'john.doe@example.com',
+			password: 'Test@123456789101112131456',
+		})
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(userRepository.users.length).toBe(0)
+	})
+
+	it('should not be able to create a user with an phone with more than 16 characters', async () => {
+		const result = await createUserUseCase.execute({
+			name: 'John Doe',
+			email: 'john.doe@example.com',
+			password: 'Teste@123',
+			phone: '12345678901234567890',
+		})
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPhoneError)
 		expect(userRepository.users.length).toBe(0)
 	})
 

@@ -16,15 +16,15 @@ export class InMemoryUserRepository implements UserRepository {
 	private getFieldValue(user: UserEntity, field: keyof UserFilters): string {
 		switch (field) {
 			case 'name':
-				return user.props.name
+				return user.name
 			case 'email':
-				return user.props.email.value
+				return user.email
 			case 'phone':
-				return user.props.phone || ''
+				return user.phone || ''
 			case 'status':
-				return user.props.status || UserStatus.ACTIVE
+				return user.status || UserStatus.ACTIVE
 			case 'sessionStatus':
-				return user.props.sessionStatus || SessionStatus.OFFLINE
+				return user.sessionStatus || SessionStatus.OFFLINE
 			default:
 				return ''
 		}
@@ -40,9 +40,7 @@ export class InMemoryUserRepository implements UserRepository {
 
 	public findByEmail(email: string): Promise<UserEntity | null> {
 		return new Promise((resolve) => {
-			const user = this.users.find(
-				(user) => user.props.email.value === email,
-			)
+			const user = this.users.find((user) => user.email === email)
 			resolve(user ?? null)
 		})
 	}
@@ -56,7 +54,7 @@ export class InMemoryUserRepository implements UserRepository {
 
 	public findByUuid(uuid: string): Promise<UserEntity | null> {
 		return new Promise((resolve) => {
-			const user = this.users.find((user) => user.props.uuid === uuid)
+			const user = this.users.find((user) => user.uuid === uuid)
 			resolve(user ?? null)
 		})
 	}
@@ -112,7 +110,7 @@ export class InMemoryUserRepository implements UserRepository {
 				if (filters?.name) {
 					condition = !!(
 						condition &&
-						user.props.name
+						user.name
 							.toLowerCase()
 							.includes(filters.name.toLowerCase())
 					)
@@ -120,7 +118,7 @@ export class InMemoryUserRepository implements UserRepository {
 				if (filters?.email) {
 					condition = !!(
 						condition &&
-						user.props.email.value
+						user.email
 							.toLowerCase()
 							.includes(filters.email.toLowerCase())
 					)
@@ -128,20 +126,18 @@ export class InMemoryUserRepository implements UserRepository {
 				if (filters?.phone) {
 					condition = !!(
 						condition &&
-						user.props.phone
+						user.phone
 							?.toLowerCase()
 							.includes(filters.phone.toLowerCase())
 					)
 				}
 				if (filters?.status) {
-					condition = !!(
-						condition && user.props.status === filters.status
-					)
+					condition = !!(condition && user.status === filters.status)
 				}
 				if (filters?.sessionStatus) {
 					condition = !!(
 						condition &&
-						user.props.sessionStatus === filters.sessionStatus
+						user.sessionStatus === filters.sessionStatus
 					)
 				}
 

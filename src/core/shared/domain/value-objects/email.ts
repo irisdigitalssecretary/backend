@@ -23,5 +23,11 @@ export class Email extends ValueObject<{ value: string }> {
 		if (!this.REGEX_PATTERN.test(String(email).toLowerCase())) {
 			throw new InvalidEmailError()
 		}
+
+		if (email.length > 100) {
+			throw new InvalidEmailError(
+				'E-mail deve possuir no máximo 100 caracteres.',
+			)
+		}
 	}
 }

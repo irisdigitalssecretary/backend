@@ -2,6 +2,7 @@ import { Email } from '@shared/domain/value-objects/email'
 import { Entity } from '@shared/domain/base/entity'
 import { PasswordHash } from '../../../../shared/domain/value-objects/password-hash'
 import { UniqueEntityId } from '@shared/domain/value-objects/unique-entity-id'
+import { Phone } from '@/core/shared/domain/value-objects/phone'
 
 export enum SessionStatus {
 	ONLINE = 'online',
@@ -23,7 +24,9 @@ export interface UserEntityProps {
 	password?: PasswordHash
 	sessionStatus?: SessionStatus
 	status?: UserStatus
-	phone?: string
+	phone?: Phone
+	createdAt?: Date
+	updatedAt?: Date
 }
 
 export class UserEntity extends Entity<UserEntityProps> {
@@ -76,7 +79,7 @@ export class UserEntity extends Entity<UserEntityProps> {
 	}
 
 	public get phone(): string {
-		return this.props.phone || ''
+		return this.props.phone?.value || ''
 	}
 
 	public static create(

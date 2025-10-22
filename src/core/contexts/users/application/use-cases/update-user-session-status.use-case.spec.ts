@@ -57,7 +57,7 @@ describe('UpdateUserSessionStatusUseCase', () => {
 		expect(userRepository.users.length).toBe(1)
 
 		const result = await updateUserSessionStatusUseCase.execute({
-			id: user.props.id as string,
+			id: user.props.id as number,
 			status: SessionStatus.OFFLINE,
 		})
 

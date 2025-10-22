@@ -12,6 +12,7 @@ interface CreateUserUseCaseRequest {
 	name: string
 	email: string
 	password: string
+	phone?: string
 }
 
 type CreateUserUseCaseResponse = Either<

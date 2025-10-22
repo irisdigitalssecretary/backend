@@ -4,7 +4,7 @@ import { UserNotFoundError } from '../../domain/errors/user-not-found'
 import { Either, left, right } from '@/core/shared/domain/base/either'
 
 interface DeleteUserByIdUseCaseRequest {
-	id: string
+	id: number
 }
 
 type DeleteUserByIdUseCaseResponse = Either<UserNotFoundError, UserEntity>

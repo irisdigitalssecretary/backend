@@ -1,0 +1,47 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id            Int           @id @default(autoincrement())
+    uuid          String        @unique @default(uuid())
+    name          String        @db.VarChar(150)
+    email         String        @db.VarChar(100)
+    password      String?
+    sessionStatus SessionStatus @default(offline)
+    status        UserStatus    @default(active)
+    phone         String?       @db.VarChar(16)
+    companyId     Int?
+    createdAt     DateTime      @default(now())
+    updatedAt     DateTime      @updatedAt
+
+    company Company? @relation(fields: [companyId], references: [id])
+}
+
+model Company {
+    id   Int    @id @default(autoincrement()) @db.Integer()
+    name String @db.VarChar(150)
+
+    users User[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum SessionStatus {
+    online
+    away
+    busy
+    offline
+}
+
+enum UserStatus {
+    active
+    inactive
+}

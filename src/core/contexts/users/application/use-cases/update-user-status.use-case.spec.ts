@@ -23,7 +23,7 @@ describe('UpdateUserStatusUseCase', () => {
 
 	it('should not be able to update the user status if the user does not exist', async () => {
 		const result = await updateUserStatusUseCase.execute({
-			id: '999',
+			id: 999,
 			status: UserStatus.INACTIVE,
 		})
 
@@ -33,7 +33,7 @@ describe('UpdateUserStatusUseCase', () => {
 				result.value.statusCode === 404,
 		).toBe(true)
 		expect(
-			userRepository.users.find((user) => user.props.id === '999'),
+			userRepository.users.find((user) => user.props.id === 999),
 		).toBeUndefined()
 	})
 
@@ -52,7 +52,7 @@ describe('UpdateUserStatusUseCase', () => {
 		expect(userRepository.users.length).toBe(1)
 
 		const result = await updateUserStatusUseCase.execute({
-			id: user.props.id as string,
+			id: user.props.id as number,
 			status: UserStatus.INACTIVE,
 		})
 

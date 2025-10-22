@@ -42,7 +42,7 @@ export class UpdateUserUseCase {
 
 	public async execute(
 		props: UpdateUserUseCaseRequest,
-		id: string,
+		id: number,
 	): Promise<UpdateUserUseCaseResponse> {
 		let userEmailAlreadyExists: UserEntity | null = null
 

@@ -16,6 +16,13 @@ describe('PasswordHash test', () => {
 		).rejects.toThrow(InvalidPasswordError)
 	})
 
+	it('should not be able to create an password with more than 16 characters', () => {
+		void expect(
+			async () =>
+				await PasswordHash.create('Test@123456789101112131456', hasher),
+		).rejects.toThrow(InvalidPasswordError)
+	})
+
 	it('should not be able to create an password without uppercase letter', () => {
 		void expect(
 			async () => await PasswordHash.create('12345678', hasher),

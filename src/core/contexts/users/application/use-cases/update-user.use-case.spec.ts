@@ -40,7 +40,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			'1',
+			1,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -93,7 +93,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user2.props.id as string,
+			user2.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -125,7 +125,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user.props.id as string,
+			user.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -161,7 +161,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user.props.id as string,
+			user.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -197,7 +197,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user.props.id as string,
+			user.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -233,7 +233,43 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user.props.id as string,
+			user.props.id as number,
+		)
+
+		expect(result.isLeft()).toBe(true)
+		expect(
+			result.value instanceof InvalidPasswordError &&
+				result.value.statusCode === 400,
+		).toBe(true)
+		void expect(
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
+		).resolves.toBe(true)
+	})
+
+	it('should not be able to update a user with a password with more than 16 characters', async () => {
+		const user = await userRepository.create(
+			await makeUserEntity(
+				{
+					name: 'John Doe',
+					email: 'john.doe@example.com',
+					password: 'Test@123',
+					sessionStatus: SessionStatus.ONLINE,
+					status: UserStatus.ACTIVE,
+				},
+				hasher,
+			),
+		)
+
+		const result = await updateUserUseCase.execute(
+			{
+				name: 'John Doe',
+				email: 'john.doe@example.com',
+				password: 'Test@123456789101112131456',
+				oldPassword: 'Test@123',
+				sessionStatus: SessionStatus.ONLINE,
+				status: UserStatus.ACTIVE,
+			},
+			user.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -269,7 +305,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user.props.id as string,
+			user.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -305,7 +341,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user.props.id as string,
+			user.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -341,7 +377,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user.props.id as string,
+			user.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -377,7 +413,7 @@ describe('UpdateUserUseCase', () => {
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
-			user.props.id as string,
+			user.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -428,7 +464,7 @@ describe('UpdateUserUseCase', () => {
 
 		const result = await updateUserUseCase.execute(
 			data,
-			user.props.id as string,
+			user.props.id as number,
 		)
 
 		const userUpdated = userRepository.users[1]

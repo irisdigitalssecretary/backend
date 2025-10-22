@@ -48,5 +48,11 @@ export class PasswordHash extends ValueObject<PasswordHashProps> {
 				'Senha deve conter pelo menos um caractere especial.',
 			)
 		}
+
+		if (password.length > 16) {
+			throw new InvalidPasswordError(
+				'Senha deve ter no máximo 16 caracteres.',
+			)
+		}
 	}
 }

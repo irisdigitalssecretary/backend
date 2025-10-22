@@ -1,17 +1,13 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { ConfigModule } from '@nestjs/config'
 import { AppController } from './app.controller'
 import { env } from '@shared/infra/config/env-validation'
+import { PrismaService } from './core/shared/infra/database/prisma/prisma.service'
 
 @Module({
-	imports: [
-		ConfigModule.forRoot({
-			isGlobal: true,
-		}),
-		MongooseModule.forRoot(env.MONGO_URI as string),
-	],
+	imports: [MongooseModule.forRoot(env.MONGO_URI as string)],
 	controllers: [AppController],
-	providers: [],
+	providers: [PrismaService],
+	exports: [PrismaService],
 })
 export class AppModule {}
