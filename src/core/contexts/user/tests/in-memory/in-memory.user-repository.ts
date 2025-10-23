@@ -13,23 +13,6 @@ import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
 export class InMemoryUserRepository implements UserRepository {
 	public readonly users: UserEntity[] = []
 
-	private getFieldValue(user: UserEntity, field: keyof UserFilters): string {
-		switch (field) {
-			case 'name':
-				return user.name
-			case 'email':
-				return user.email
-			case 'phone':
-				return user.phone || ''
-			case 'status':
-				return user.status || UserStatus.ACTIVE
-			case 'sessionStatus':
-				return user.sessionStatus || SessionStatus.OFFLINE
-			default:
-				return ''
-		}
-	}
-
 	public create(user: UserEntity): Promise<UserEntity> {
 		return new Promise((resolve) => {
 			user.props.id = user.props.id || Math.floor(Math.random() * 100)
@@ -144,38 +127,37 @@ export class InMemoryUserRepository implements UserRepository {
 				return condition
 			})
 
-			if (props.orderBy?.length) {
-				users = users.sort((a, b) => {
-					for (const order of props.orderBy!) {
-						let compareResult = 0
+			const orderByEntries = Object.entries(props.orderBy || {})
+			users = users.sort((a, b) => {
+				for (const [field, direction] of orderByEntries) {
+					let compareResult = 0
 
-						const fieldA = this.getFieldValue(a, order.field)
-						const fieldB = this.getFieldValue(b, order.field)
+					const fieldA = a[field]
+					const fieldB = b[field]
 
-						if (fieldA && fieldB) {
-							if (
-								typeof fieldA === 'string' &&
-								typeof fieldB === 'string'
-							) {
-								compareResult = String(fieldA)
-									.toLowerCase()
-									.localeCompare(
-										String(fieldB).toLowerCase(),
-										'pt-BR',
-									)
-							}
-						}
-
-						if (compareResult !== 0) {
-							return order.direction === 'desc'
-								? -compareResult
-								: compareResult
+					if (fieldA && fieldB) {
+						if (
+							typeof fieldA === 'string' &&
+							typeof fieldB === 'string'
+						) {
+							compareResult = String(fieldA)
+								.toLowerCase()
+								.localeCompare(
+									String(fieldB).toLowerCase(),
+									'pt-BR',
+								)
 						}
 					}
 
-					return 0
-				})
-			}
+					if (compareResult !== 0) {
+						return direction === 'desc'
+							? -compareResult
+							: compareResult
+					}
+				}
+
+				return 0
+			})
 
 			users = users.slice(
 				props.pagination?.offset,

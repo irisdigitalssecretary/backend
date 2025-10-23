@@ -82,6 +82,18 @@ export class UserEntity extends Entity<UserEntityProps> {
 		return this.props.phone?.value || ''
 	}
 
+	public get createdAt(): Date {
+		return this.props.createdAt || new Date()
+	}
+
+	public get updatedAt(): Date {
+		return this.props.updatedAt || new Date()
+	}
+
+	public get props() {
+		return this._props || {}
+	}
+
 	public static create(
 		props: UserEntityProps,
 		id?: UniqueEntityId,

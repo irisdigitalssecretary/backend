@@ -1,4 +1,4 @@
-import { PrismaService } from '@/core/shared/infra/database/prisma/prisma.service'
+import { PrismaService } from '@shared/infra/database/prisma/prisma.service'
 import {
 	UserFilters,
 	UserRepository,
@@ -9,8 +9,8 @@ import {
 	UserStatus,
 } from '../../../domain/entities/user-entity'
 import { UserMapper } from '../mappers/user.mapper'
-import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
-import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
+import { FindManyOptions } from '@shared/domain/utils/find-many'
+import { OffsetPagination } from '@shared/domain/utils/offset-pagination'
 import { Injectable } from '@nestjs/common'
 
 @Injectable()
@@ -23,20 +23,14 @@ export class PrismaUserRepository implements UserRepository {
 		const prisma = this.prisma
 
 		const createdUser = await prisma.user.create({
-			data: {
-				name: user.name,
-				email: user.email,
-				password: user.password,
-			},
+			data: UserMapper.toPersistence(user),
 		})
 
 		return await UserMapper.toDomain(createdUser)
 	}
 
 	async findByEmail(email: string): Promise<UserEntity | null> {
-		const user = await this.prisma.user.findUnique({
-			where: { email },
-		})
+		const user = await this.prisma.user.findFirst({ where: { email } })
 		return user ? await UserMapper.toDomain(user) : null
 	}
 
@@ -58,15 +52,8 @@ export class PrismaUserRepository implements UserRepository {
 		const prisma = this.prisma
 
 		const updatedUser = await prisma.user.update({
-			where: { id: user.id },
-			data: {
-				name: user.name,
-				email: user.email,
-				password: user.password,
-				phone: user.phone,
-				sessionStatus: user.sessionStatus,
-				status: user.status,
-			},
+			where: { id: user.props.id },
+			data: UserMapper.toPersistence(user),
 		})
 
 		return await UserMapper.toDomain(updatedUser)
@@ -100,9 +87,11 @@ export class PrismaUserRepository implements UserRepository {
 			orderBy: props.orderBy,
 		})
 
-		return (await Promise.all(
-			users.map(void UserMapper.toDomain),
-		)) as UserEntity[]
+		const domainUsers: UserEntity[] = await Promise.all(
+			users.map((u) => UserMapper.toDomain(u)),
+		)
+
+		return domainUsers
 	}
 
 	async updateSessionStatus(

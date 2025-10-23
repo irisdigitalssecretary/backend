@@ -1,6 +1,5 @@
 generator client {
     provider = "prisma-client-js"
-    output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,24 +13,11 @@ model User {
     name          String        @db.VarChar(150)
     email         String        @db.VarChar(100)
     password      String?
-    sessionStatus SessionStatus @default(offline)
+    sessionStatus SessionStatus @default(online)
     status        UserStatus    @default(active)
     phone         String?       @db.VarChar(16)
-    companyId     Int?
     createdAt     DateTime      @default(now())
     updatedAt     DateTime      @updatedAt
-
-    company Company? @relation(fields: [companyId], references: [id])
-}
-
-model Company {
-    id   Int    @id @default(autoincrement()) @db.Integer()
-    name String @db.VarChar(150)
-
-    users User[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
 }
 
 enum SessionStatus {

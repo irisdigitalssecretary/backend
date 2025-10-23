@@ -10,5 +10,6 @@
 !.vscode/extensions.json
 
 .env
+.env.test
 
 /generated/prisma

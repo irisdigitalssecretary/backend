@@ -1,8 +1,7 @@
 import { PaginationBase } from '../base/pagination-base'
 
-export interface OrderBy<Filters = any> {
-	field: keyof Filters
-	direction: 'asc' | 'desc'
+export type OrderBy<Filters = any> = {
+	[K in keyof Filters]?: 'asc' | 'desc'
 }
 
 export interface FindManyOptions<
@@ -11,5 +10,5 @@ export interface FindManyOptions<
 > {
 	filters?: Filters
 	pagination?: Pagination
-	orderBy?: OrderBy<Filters>[]
+	orderBy?: OrderBy<Filters>
 }

@@ -240,7 +240,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
 					filters: {},
-					orderBy: [{ field: 'name', direction: 'asc' }],
+					orderBy: { name: 'asc' },
 				},
 			)
 
@@ -259,7 +259,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
 					filters: {},
-					orderBy: [{ field: 'name', direction: 'desc' }],
+					orderBy: { name: 'desc' },
 				},
 			)
 
@@ -278,7 +278,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
 					filters: {},
-					orderBy: [{ field: 'email', direction: 'asc' }],
+					orderBy: { email: 'asc' },
 				},
 			)
 
@@ -297,7 +297,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
 					filters: {},
-					orderBy: [{ field: 'status', direction: 'asc' }],
+					orderBy: { status: 'asc' },
 				},
 			)
 
@@ -312,7 +312,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
 					filters: { status: UserStatus.ACTIVE },
-					orderBy: [{ field: 'name', direction: 'asc' }],
+					orderBy: { name: 'asc' },
 					pagination: OffsetPagination.create(2, 1),
 				},
 			)

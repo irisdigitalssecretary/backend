@@ -14,7 +14,6 @@ export const envSchema = z.object({
 	POSTGRES_DB: z.string(),
 	POSTGRES_PORT: z.coerce.number().default(5432),
 	DATABASE_URL: z.url(),
-	DATABASE_URL_TEST: z.url(),
 
 	// MongoDB
 	MONGO_HOST: z.string().default('localhost'),

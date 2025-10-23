@@ -4,7 +4,7 @@ import path from 'node:path'
 export default defineConfig({
 	test: {
 		globals: true,
-		globalSetup: './src/core/shared/infra/tests/unitary/setup.ts',
+		include: ['**/*.spec.ts'],
 	},
 	resolve: {
 		alias: {

@@ -7,6 +7,7 @@ import { AppError } from '@shared/domain/base/app-error'
 import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password'
 import { InvalidEmailError } from '@shared/domain/errors/invalid-email'
 import { makeUserEntity } from '../../factories/make-user-entity'
+import { Injectable } from '@nestjs/common'
 
 interface CreateUserUseCaseRequest {
 	name: string
@@ -20,6 +21,7 @@ type CreateUserUseCaseResponse = Either<
 	UserEntity
 >
 
+@Injectable()
 export class CreateUserUseCase {
 	constructor(
 		private readonly userRepository: UserRepository,

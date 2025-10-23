@@ -2,7 +2,7 @@ import { UniqueEntityId } from '../value-objects/unique-entity-id'
 
 export abstract class Entity<T> {
 	constructor(
-		public readonly props: T,
+		protected readonly _props: T,
 		public readonly id?: UniqueEntityId,
 	) {}
 
@@ -11,10 +11,10 @@ export abstract class Entity<T> {
 
 		if (this === object) return true
 
-		if (this.props === object.props) return true
+		if (this._props === object._props) return true
 
 		if (this.id && this.id === object.id) return true
 
-		return JSON.stringify(this.props) === JSON.stringify(object.props)
+		return JSON.stringify(this._props) === JSON.stringify(object._props)
 	}
 }
