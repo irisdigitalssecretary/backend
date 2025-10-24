@@ -1,4 +1,3 @@
-import { PrismaService } from '@shared/infra/database/prisma/prisma.service'
 import {
 	UserFilters,
 	UserRepository,
@@ -12,6 +11,7 @@ import { UserMapper } from '../mappers/user.mapper'
 import { FindManyOptions } from '@shared/domain/utils/find-many'
 import { OffsetPagination } from '@shared/domain/utils/offset-pagination'
 import { Injectable } from '@nestjs/common'
+import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {

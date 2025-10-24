@@ -1,4 +1,4 @@
-import { BcryptHasher } from '@shared/infra/services/bcrypt-hasher'
+import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.service'
 import { UpdateUserUseCase } from './update-user.use-case'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'

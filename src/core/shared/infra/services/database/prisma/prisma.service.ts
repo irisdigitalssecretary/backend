@@ -7,7 +7,6 @@ export class PrismaService extends PrismaClient {
 	private static readonly MODELS_WITH_COMPANY = ['User']
 
 	constructor() {
-		console.log('APP_ENV', env.APP_ENV)
 		super({
 			log:
 				env.APP_ENV === 'production'
@@ -75,5 +74,25 @@ export class PrismaService extends PrismaClient {
 
 	async onModuleDestroy() {
 		await this.$disconnect()
+	}
+
+	public async cleanDatabase() {
+		await this.$queryRaw`
+			DO
+			$$
+			DECLARE
+				tab RECORD;
+			BEGIN
+				FOR tab IN
+					SELECT tablename
+					FROM pg_tables
+					WHERE schemaname = 'public'
+					AND tablename NOT IN ('_prisma_migrations')
+				LOOP
+					EXECUTE format('TRUNCATE TABLE %I.%I CASCADE;', 'public', tab.tablename);
+				END LOOP;
+			END
+			$$;
+		`
 	}
 }

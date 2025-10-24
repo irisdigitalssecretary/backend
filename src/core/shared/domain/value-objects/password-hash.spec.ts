@@ -1,4 +1,4 @@
-import { BcryptHasher } from '@shared/infra/services/bcrypt-hasher'
+import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.service'
 import { PasswordHash } from './password-hash'
 import { InvalidPasswordError } from '../errors/invalid-password'
 import { Hasher } from '../infra/services/hasher'

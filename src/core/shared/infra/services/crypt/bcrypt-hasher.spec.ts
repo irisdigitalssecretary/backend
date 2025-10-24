@@ -1,4 +1,4 @@
-import { BcryptHasher } from './bcrypt-hasher'
+import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.service'
 
 describe('BcryptHasher test', () => {
 	it('should be able to hash a password', async () => {

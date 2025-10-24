@@ -5,7 +5,8 @@ export default defineConfig({
 	test: {
 		globals: true,
 		globalSetup: path.resolve(__dirname, './test/setup.e2e.ts'),
-		include: ['**/*.e2e.spec.ts'],
+		include: ['**/*.spec.e2e.ts'],
+		hookTimeout: 0,
 	},
 	resolve: {
 		alias: {
