@@ -76,23 +76,18 @@ export class PrismaService extends PrismaClient {
 		await this.$disconnect()
 	}
 
-	public async cleanDatabase() {
-		await this.$queryRaw`
-			DO
-			$$
-			DECLARE
-				tab RECORD;
-			BEGIN
-				FOR tab IN
-					SELECT tablename
-					FROM pg_tables
-					WHERE schemaname = 'public'
-					AND tablename NOT IN ('_prisma_migrations')
-				LOOP
-					EXECUTE format('TRUNCATE TABLE %I.%I CASCADE;', 'public', tab.tablename);
-				END LOOP;
-			END
-			$$;
+	async cleanDatabase() {
+		const tables = await this.$queryRaw<{ tablename: string }[]>`
+		  SELECT tablename
+		  FROM pg_tables
+		  WHERE schemaname = 'public'
+		  AND tablename NOT IN ('_prisma_migrations')
 		`
+
+		for (const table of tables) {
+			await this.$executeRawUnsafe(
+				`TRUNCATE TABLE "${table.tablename}" CASCADE;`,
+			)
+		}
 	}
 }

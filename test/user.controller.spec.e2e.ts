@@ -19,10 +19,6 @@ describe('UserController (E2E)', () => {
 		await app.close()
 	})
 
-	beforeEach(async () => {
-		await prismaService.cleanDatabase()
-	})
-
 	it('POST /users -> should be able to create a new user', async () => {
 		const newUser = {
 			name: 'João Vitor Machado Rorato',
