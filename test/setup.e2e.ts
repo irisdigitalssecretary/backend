@@ -21,7 +21,8 @@ export default async function setup() {
 
 	return function teardown() {
 		console.log('🧹 Removendo ambiente de testes')
-		execSync('docker compose -f docker-compose.test.yml down -v')
+
+		execSync('docker compose -f docker-compose.test.yml down')
 		console.log('✅ AMBIENTE DE TESTES REMOVIDO!')
 	}
 }
