@@ -1,18 +1,14 @@
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
 import { createApp } from './utils/create-app'
-import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
 
 describe('UserController (E2E)', () => {
 	let app: INestApplication
 	let server: any
-	let prismaService: PrismaService
 
 	beforeAll(async () => {
 		app = await createApp()
-		console.log(app, 'buceta')
 		server = app.getHttpServer()
-		prismaService = app.get(PrismaService)
 	})
 
 	afterAll(async () => {
