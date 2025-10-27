@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { config } from 'dotenv'
 
-config(process.env.APP_ENV === 'test' ? { path: '.env.test' } : {})
+config({ path: '.env.test' })
 
 export const envSchema = z.object({
 	// Aplicação

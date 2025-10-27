@@ -26,8 +26,6 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(baseURL).post('/users').send(newUser)
 
-		console.log({ response, baseURL }, 'boceta')
-
 		expect(response.status).toBe(201)
 	})
 })
