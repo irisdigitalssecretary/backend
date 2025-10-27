@@ -1,4 +1,10 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common'
+import {
+	BadRequestException,
+	Body,
+	Controller,
+	Post,
+	Inject,
+} from '@nestjs/common'
 import { type CreateUserBody, createUserSchema } from '../dtos/create-user.dto'
 import { ZodValidationPipe } from '@/core/shared/infra/pipes/zod-validation-pipes'
 import { CreateUserUseCase } from '../../../application/use-cases/create-user.use-case'
@@ -6,7 +12,10 @@ import { UserViewModel } from '../view-models/user-view-model'
 
 @Controller('users')
 export class UserController {
-	constructor(private readonly createUserUseCase: CreateUserUseCase) {}
+	constructor(
+		@Inject(CreateUserUseCase)
+		private readonly createUserUseCase: CreateUserUseCase,
+	) {}
 
 	@Post()
 	async create(

@@ -1,12 +1,12 @@
+import 'reflect-metadata'
 import { AppModule } from '@/app.module'
-import { Test } from '@nestjs/testing'
+import { NestFactory } from '@nestjs/core'
+import { env } from '@/core/shared/infra/config/env-validation'
 
 export async function createApp() {
-	const moduleRef = await Test.createTestingModule({
-		imports: [AppModule],
-	}).compile()
-
-	const app = moduleRef.createNestApplication()
+	const app = await NestFactory.create(AppModule, { logger: false })
 	await app.init()
-	return app
+	await app.listen(env.PORT, '0.0.0.0')
+	const url = await app.getUrl()
+	return { app, url }
 }

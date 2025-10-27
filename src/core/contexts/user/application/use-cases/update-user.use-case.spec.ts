@@ -8,13 +8,13 @@ import {
 	UserEntity,
 	UserStatus,
 } from '../../domain/entities/user-entity'
-import { UserEmailExistsError } from '../../domain/errors/user-email-already-exists'
-import { InvalidEmailError } from '@shared/domain/errors/invalid-email'
-import { InvalidPasswordError } from '@shared/domain/errors/invalid-password'
-import { UserNotFoundError } from '../../domain/errors/user-not-found'
+import { UserEmailExistsError } from './errors/user-email-already-exists'
+import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
+import { InvalidPasswordError } from '@/core/shared/domain/errors/invalid-password-error'
+import { UserNotFoundError } from './errors/user-not-found'
 import { makeUserEntity } from '../../factories/make-user-entity'
-import { OldPasswordRequiredError } from '../../domain/errors/old-password-required'
-import { OldPasswordInvalidError } from '../../domain/errors/old-password-invalid'
+import { OldPasswordRequiredError } from './errors/old-password-required'
+import { OldPasswordInvalidError } from './errors/old-password-invalid'
 
 describe('UpdateUserUseCase', () => {
 	let hasher: Hasher
@@ -44,10 +44,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof UserNotFoundError &&
-				result.value.statusCode === 404,
-		).toBe(true)
+		expect(result.value).toMatchObject({
+			statusCode: 404,
+		})
+		expect(result.value).toBeInstanceOf(UserNotFoundError)
 		expect(userRepository.users.length).toBe(0)
 	})
 
@@ -97,10 +97,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof UserEmailExistsError &&
-				result.value.statusCode === 409,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(UserEmailExistsError)
+		expect(result.value).toMatchObject({
+			statusCode: 409,
+		})
 	})
 
 	it('should not be able to update a user if the old password not exists and the password is provided', async () => {
@@ -129,10 +129,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof OldPasswordRequiredError &&
-				result.value.statusCode === 401,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(OldPasswordRequiredError)
+		expect(result.value).toMatchObject({
+			statusCode: 401,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
@@ -165,10 +165,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof OldPasswordInvalidError &&
-				result.value.statusCode === 401,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(OldPasswordInvalidError)
+		expect(result.value).toMatchObject({
+			statusCode: 401,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
@@ -201,10 +201,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof InvalidPasswordError &&
-				result.value.statusCode === 400,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			statusCode: 400,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
@@ -237,10 +237,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof InvalidPasswordError &&
-				result.value.statusCode === 400,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			statusCode: 400,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
@@ -273,10 +273,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof InvalidPasswordError &&
-				result.value.statusCode === 400,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			statusCode: 400,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
@@ -309,10 +309,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof InvalidPasswordError &&
-				result.value.statusCode === 400,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			statusCode: 400,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
@@ -345,10 +345,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof InvalidPasswordError &&
-				result.value.statusCode === 400,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			statusCode: 400,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
@@ -381,10 +381,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof InvalidPasswordError &&
-				result.value.statusCode === 400,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			statusCode: 400,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
@@ -417,10 +417,10 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof InvalidEmailError &&
-				result.value.statusCode === 400,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidEmailError)
+		expect(result.value).toMatchObject({
+			statusCode: 400,
+		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)

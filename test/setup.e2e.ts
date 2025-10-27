@@ -1,11 +1,10 @@
 import { execSync } from 'node:child_process'
-import { config } from 'dotenv'
 import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
 
 export default async function setup() {
 	console.log('🚀 INICIANDO TESTES E2E')
 
-	config({ path: '.env.test' })
+	process.env.APP_ENV = 'test'
 
 	execSync(
 		'docker compose -f docker-compose.test.yml --env-file ./.env.test up -d',

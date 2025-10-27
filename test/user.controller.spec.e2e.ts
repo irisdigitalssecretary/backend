@@ -4,11 +4,12 @@ import { createApp } from './utils/create-app'
 
 describe('UserController (E2E)', () => {
 	let app: INestApplication
-	let server: any
+	let baseURL: string
 
 	beforeAll(async () => {
-		app = await createApp()
-		server = app.getHttpServer()
+		const created = await createApp()
+		app = created.app
+		baseURL = created.url
 	})
 
 	afterAll(async () => {
@@ -23,9 +24,10 @@ describe('UserController (E2E)', () => {
 			phone: '5547988950332',
 		}
 
-		const response = await request(server)
-			.post('/users')
-			.send(newUser)
-			.expect(201)
+		const response = await request(baseURL).post('/users').send(newUser)
+
+		console.log({ response, baseURL }, 'boceta')
+
+		expect(response.status).toBe(201)
 	})
 })

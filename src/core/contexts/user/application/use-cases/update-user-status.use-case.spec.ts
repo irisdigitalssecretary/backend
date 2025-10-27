@@ -2,7 +2,7 @@ import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.s
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
-import { UserNotFoundError } from '../../domain/errors/user-not-found'
+import { UserNotFoundError } from './errors/user-not-found'
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { UpdateUserStatusUseCase } from './update-user-status.use-case'
 import { UserStatus } from '../../domain/entities/user-entity'
@@ -28,10 +28,10 @@ describe('UpdateUserStatusUseCase', () => {
 		})
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof UserNotFoundError &&
-				result.value.statusCode === 404,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(UserNotFoundError)
+		expect(result.value).toMatchObject({
+			statusCode: 404,
+		})
 		expect(
 			userRepository.users.find((user) => user.props.id === 999),
 		).toBeUndefined()

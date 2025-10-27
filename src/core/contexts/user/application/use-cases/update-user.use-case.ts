@@ -5,15 +5,15 @@ import {
 	UserStatus,
 } from '../../domain/entities/user-entity'
 import { Either, left, right } from '@shared/domain/base/either'
-import { UserEmailExistsError } from '../../domain/errors/user-email-already-exists'
+import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { AppError } from '@shared/domain/base/app-error'
-import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password'
-import { InvalidEmailError } from '@shared/domain/errors/invalid-email'
+import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password-error'
+import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { makeUserEntity } from '../../factories/make-user-entity'
-import { UserNotFoundError } from '../../domain/errors/user-not-found'
-import { OldPasswordRequiredError } from '../../domain/errors/old-password-required'
-import { OldPasswordInvalidError } from '../../domain/errors/old-password-invalid'
+import { UserNotFoundError } from './errors/user-not-found'
+import { OldPasswordRequiredError } from './errors/old-password-required'
+import { OldPasswordInvalidError } from './errors/old-password-invalid'
 
 interface UpdateUserUseCaseRequest {
 	name: string

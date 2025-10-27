@@ -1,4 +1,4 @@
-import { InvalidPhoneError } from '../errors/invalid-phone'
+import { InvalidPhoneError } from '../errors/invalid-phone-error'
 import { Phone } from './phone'
 
 describe('Phone value object test', () => {

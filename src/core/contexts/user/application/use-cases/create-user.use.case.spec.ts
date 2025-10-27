@@ -4,10 +4,10 @@ import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserEntity } from '../../domain/entities/user-entity'
-import { UserEmailExistsError } from '../../domain/errors/user-email-already-exists'
-import { InvalidEmailError } from '@shared/domain/errors/invalid-email'
-import { InvalidPasswordError } from '@shared/domain/errors/invalid-password'
-import { InvalidPhoneError } from '@/core/shared/domain/errors/invalid-phone'
+import { UserEmailExistsError } from './errors/user-email-already-exists'
+import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
+import { InvalidPasswordError } from '@/core/shared/domain/errors/invalid-password-error'
+import { InvalidPhoneError } from '@/core/shared/domain/errors/invalid-phone-error'
 
 describe('CreateUserUseCase', () => {
 	let hasher: Hasher

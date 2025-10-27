@@ -5,8 +5,10 @@ import { UserRepository } from './domain/repositories/user-repository'
 import { PrismaUserRepository } from './infra/database/prisma/prisma-user-repository'
 import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.service'
 import { Hasher } from '@/core/shared/domain/infra/services/hasher'
+import { PrismaModule } from '@/core/shared/modules/prisma.module'
 
 @Module({
+	imports: [PrismaModule],
 	controllers: [UserController],
 	providers: [
 		CreateUserUseCase,

@@ -3,7 +3,7 @@ import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserEntity } from '../../domain/entities/user-entity'
-import { UserNotFoundError } from '../../domain/errors/user-not-found'
+import { UserNotFoundError } from './errors/user-not-found'
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { FindUserByIdUseCase } from './find-user-by-uuid.use-case'
 
@@ -27,10 +27,10 @@ describe('FindUserByIdUseCase', () => {
 		})
 
 		expect(result.isLeft()).toBe(true)
-		expect(
-			result.value instanceof UserNotFoundError &&
-				result.value.statusCode === 404,
-		).toBe(true)
+		expect(result.value).toBeInstanceOf(UserNotFoundError)
+		expect(result.value).toMatchObject({
+			statusCode: 404,
+		})
 		expect(userRepository.users.length).toBe(0)
 	})
 

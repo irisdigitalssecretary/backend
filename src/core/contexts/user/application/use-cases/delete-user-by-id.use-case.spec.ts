@@ -2,7 +2,7 @@ import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.s
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
-import { UserNotFoundError } from '../../domain/errors/user-not-found'
+import { UserNotFoundError } from './errors/user-not-found'
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { DeleteUserByIdUseCase } from './delete-user-by-id.use-case'
 
@@ -22,16 +22,16 @@ describe('DeleteUserByIdUseCase', () => {
 
 	it('should not be able to delete a user if it does not exist', async () => {
 		const result = await deleteUserByIdUseCase.execute({
-			id: '999',
+			id: 999,
 		})
 
 		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(UserNotFoundError)
+		expect(result.value).toMatchObject({
+			statusCode: 404,
+		})
 		expect(
-			result.value instanceof UserNotFoundError &&
-				result.value.statusCode === 404,
-		).toBe(true)
-		expect(
-			userRepository.users.find((user) => user.props.id === '999'),
+			userRepository.users.find((user) => user.props.id === 999),
 		).toBeUndefined()
 	})
 

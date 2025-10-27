@@ -1,4 +1,4 @@
-import { InvalidEmailError } from '../errors/invalid-email'
+import { InvalidEmailError } from '../errors/invalid-email-error'
 import { Email } from './email'
 
 describe('Email value object test', () => {

@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object'
-import { InvalidEmailError } from '../errors/invalid-email'
+import { InvalidEmailError } from '../errors/invalid-email-error'
 
 export class Email extends ValueObject<{ value: string }> {
 	public static readonly REGEX_PATTERN =
