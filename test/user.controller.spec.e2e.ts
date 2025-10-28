@@ -10,6 +10,7 @@ describe('UserController (E2E)', () => {
 		const created = await createApp()
 		app = created.app
 		baseURL = created.url
+		console.log(baseURL, 'boceta')
 	})
 
 	afterAll(async () => {
@@ -23,9 +24,7 @@ describe('UserController (E2E)', () => {
 			password: 'Test123@gmaiiil',
 			phone: '5547988950332',
 		}
-
 		const response = await request(baseURL).post('/users').send(newUser)
-
 		expect(response.status).toBe(201)
 	})
 })

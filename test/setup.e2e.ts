@@ -4,7 +4,7 @@ import { PrismaService } from '@/core/shared/infra/services/database/prisma/pris
 export default async function setup() {
 	console.log('🚀 INICIANDO TESTES E2E')
 
-	process.env.APP_ENV = 'test'
+	execSync('docker compose down')
 
 	execSync(
 		'docker compose -f docker-compose.test.yml --env-file ./.env.test up -d',
@@ -22,6 +22,7 @@ export default async function setup() {
 		console.log('🧹 Removendo ambiente de testes')
 
 		execSync('docker compose -f docker-compose.test.yml down')
+		execSync('docker compose up -d')
 		console.log('✅ AMBIENTE DE TESTES REMOVIDO!')
 	}
 }

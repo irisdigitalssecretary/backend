@@ -3,6 +3,7 @@ import path from 'node:path'
 
 export default defineConfig({
 	test: {
+		setupFiles: [path.resolve(__dirname, './test/setup.e2e.ts')],
 		globals: true,
 		globalSetup: path.resolve(__dirname, './test/setup.e2e.ts'),
 		include: ['**/*.spec.e2e.ts'],
