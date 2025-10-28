@@ -12,7 +12,7 @@ describe('Email value object test', () => {
 	})
 
 	it('should not be able to create an email with more than 100 characters', () => {
-		expect(() => Email.create('a'.repeat(101) + '@gmail.com')).toThrow(
+		expect(() => Email.create('a'.repeat(101) + '@email.com')).toThrow(
 			InvalidEmailError,
 		)
 	})

@@ -1,7 +1,9 @@
 import { execSync } from 'node:child_process'
-import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
 
-export default async function setup() {
+/**
+ * Sobe ambiente de testes e para ambiente de desenvolvimento
+ */
+export default function setup() {
 	console.log('🚀 INICIANDO TESTES E2E')
 
 	execSync('docker compose down')
@@ -13,10 +15,6 @@ export default async function setup() {
 	execSync('npm run migrate:test')
 
 	console.log('✅ Ambiente de testes configurado')
-
-	const prisma = new PrismaService()
-	await prisma.cleanDatabase()
-	await prisma.$disconnect()
 
 	return function teardown() {
 		console.log('🧹 Removendo ambiente de testes')

@@ -1,6 +1,6 @@
-import { AppError } from '../base/app-error'
+import { DomainError } from '../base/domain-error'
 
-export class InvalidPhoneError extends AppError {
+export class InvalidPhoneError extends DomainError {
 	constructor(message?: string) {
 		super(message || 'Telefone inválido', 400)
 	}

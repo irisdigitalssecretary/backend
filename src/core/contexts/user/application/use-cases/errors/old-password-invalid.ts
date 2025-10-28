@@ -1,6 +1,6 @@
-import { AppError } from '@shared/domain/base/app-error'
+import { DomainError } from '@/core/shared/domain/base/domain-error'
 
-export class OldPasswordInvalidError extends AppError {
+export class OldPasswordInvalidError extends DomainError {
 	constructor() {
 		super('A senha atual é inválida.', 401)
 	}

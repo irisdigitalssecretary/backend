@@ -1,4 +1,4 @@
-export abstract class AppError extends Error {
+export abstract class DomainError extends Error {
 	public readonly statusCode: number
 	public readonly message: string
 

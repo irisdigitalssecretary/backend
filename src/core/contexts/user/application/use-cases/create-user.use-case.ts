@@ -3,11 +3,11 @@ import { UserEntity } from '../../domain/entities/user-entity'
 import { Either, left, right } from '@shared/domain/base/either'
 import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { Hasher } from '@shared/domain/infra/services/hasher'
-import { AppError } from '@shared/domain/base/app-error'
 import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password-error'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { Injectable } from '@nestjs/common'
+import { DomainError } from '@/core/shared/domain/base/domain-error'
 
 interface CreateUserUseCaseRequest {
 	name: string
@@ -45,7 +45,7 @@ export class CreateUserUseCase {
 			const result = await this.userRepository.create(user)
 			return right(result)
 		} catch (err) {
-			return left(err as AppError)
+			return left(err as DomainError)
 		}
 	}
 }

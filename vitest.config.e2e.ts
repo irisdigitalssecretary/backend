@@ -1,14 +1,32 @@
 import { defineConfig } from 'vitest/config'
 import path from 'node:path'
+import react from '@vitejs/plugin-react-swc'
 
 export default defineConfig({
 	test: {
-		setupFiles: [path.resolve(__dirname, './test/setup.e2e.ts')],
 		globals: true,
 		globalSetup: path.resolve(__dirname, './test/setup.e2e.ts'),
 		include: ['**/*.spec.e2e.ts'],
-		hookTimeout: 0,
 	},
+	plugins: [
+		react({
+			tsDecorators: true,
+			useAtYourOwnRisk_mutateSwcOptions(options) {
+				options.jsc = {
+					...options.jsc,
+					parser: {
+						...(options.jsc?.parser || {}),
+						syntax: 'typescript',
+						decorators: true,
+					},
+					transform: {
+						...(options.jsc?.transform || {}),
+						decoratorMetadata: true,
+					},
+				}
+			},
+		}),
+	],
 	resolve: {
 		alias: {
 			'@shared': path.resolve(__dirname, './src/core/shared'),

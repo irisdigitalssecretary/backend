@@ -7,7 +7,7 @@ import {
 import { Either, left, right } from '@shared/domain/base/either'
 import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { Hasher } from '@shared/domain/infra/services/hasher'
-import { AppError } from '@shared/domain/base/app-error'
+import { DomainError } from '@/core/shared/domain/base/domain-error'
 import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password-error'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { makeUserEntity } from '../../factories/make-user-entity'
@@ -91,7 +91,7 @@ export class UpdateUserUseCase {
 			const result = await this.userRepository.update(userEntity)
 			return right(result)
 		} catch (err) {
-			return left(err as AppError)
+			return left(err as DomainError)
 		}
 	}
 }
