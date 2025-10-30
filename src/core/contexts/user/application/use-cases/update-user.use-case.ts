@@ -7,13 +7,13 @@ import {
 import { Either, left, right } from '@shared/domain/base/either'
 import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { Hasher } from '@shared/domain/infra/services/hasher'
-import { DomainError } from '@/core/shared/domain/base/domain-error'
 import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password-error'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
-import { makeUserEntity } from '../../factories/make-user-entity'
 import { UserNotFoundError } from './errors/user-not-found'
-import { OldPasswordRequiredError } from './errors/old-password-required'
-import { OldPasswordInvalidError } from './errors/old-password-invalid'
+import { OldPasswordInvalidError } from '../../domain/errors/old-password-invalid'
+import { OldPasswordRequiredError } from '../../domain/errors/old-password-required'
+import { DomainError } from '@/core/shared/domain/base/domain-error'
+import { Email } from '@/core/shared/domain/value-objects/email'
 
 interface UpdateUserUseCaseRequest {
 	name: string
@@ -62,33 +62,24 @@ export class UpdateUserUseCase {
 			return left(new UserEmailExistsError())
 		}
 
-		if (props.password && !props.oldPassword) {
-			return left(new OldPasswordRequiredError())
-		}
-
-		let isOldPasswordValid = false
-
-		if (props.password && props.oldPassword) {
-			isOldPasswordValid = await this.hasher.compare(
-				props.oldPassword,
-				userToUpdate.password ?? '',
-			)
-		}
-
-		if (!isOldPasswordValid) {
-			return left(new OldPasswordInvalidError())
-		}
-
 		try {
-			const userEntity = await makeUserEntity(
-				{
-					id: userToUpdate.props.id,
-					...props,
-				},
-				this.hasher,
-			)
+			userToUpdate.props = {
+				...userToUpdate.props,
+				email: Email.create(props.email),
+				name: props.name,
+				sessionStatus: props.sessionStatus,
+				status: props.status,
+			}
 
-			const result = await this.userRepository.update(userEntity)
+			if (props.password) {
+				await userToUpdate.updatePassword({
+					hasher: this.hasher,
+					newPassword: props.password,
+					oldPassword: props.oldPassword,
+				})
+			}
+
+			const result = await this.userRepository.update(userToUpdate)
 			return right(result)
 		} catch (err) {
 			return left(err as DomainError)

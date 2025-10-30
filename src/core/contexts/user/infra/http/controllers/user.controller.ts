@@ -6,7 +6,7 @@ import {
 	Inject,
 } from '@nestjs/common'
 import { type CreateUserBody, createUserSchema } from '../dtos/create-user.dto'
-import { ZodValidationPipe } from '@/core/shared/infra/pipes/zod-validation-pipes'
+import { ZodValidationPipe } from '@/core/shared/infra/http/pipes/zod-validation-pipes'
 import { CreateUserUseCase } from '../../../application/use-cases/create-user.use-case'
 import { UserViewModel } from '../view-models/user-view-model'
 

@@ -1,6 +1,6 @@
-import { DomainError } from '@/core/shared/domain/base/domain-error'
+import { ApplicationError } from '@/core/shared/application/errors/application-error'
 
-export class UserNotFoundError extends DomainError {
+export class UserNotFoundError extends ApplicationError {
 	constructor() {
 		super('Usuário não encontrado.', 404)
 	}

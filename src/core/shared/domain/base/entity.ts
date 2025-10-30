@@ -2,7 +2,7 @@ import { UniqueEntityId } from '../value-objects/unique-entity-id'
 
 export abstract class Entity<T> {
 	constructor(
-		protected readonly _props: T,
+		protected _props: T,
 		public readonly id?: UniqueEntityId,
 	) {}
 

@@ -79,7 +79,7 @@ describe('UserController (E2E)', () => {
 		})
 	})
 
-	it.skip('POST /users -> should not be able to create a new user with invalid email', async () => {
+	it('POST /users -> should not be able to create a new user with invalid email', async () => {
 		const newUser = {
 			name: 'John Doe',
 			email: 'john.doe',

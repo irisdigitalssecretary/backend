@@ -13,8 +13,8 @@ import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-err
 import { InvalidPasswordError } from '@/core/shared/domain/errors/invalid-password-error'
 import { UserNotFoundError } from './errors/user-not-found'
 import { makeUserEntity } from '../../factories/make-user-entity'
-import { OldPasswordRequiredError } from './errors/old-password-required'
-import { OldPasswordInvalidError } from './errors/old-password-invalid'
+import { OldPasswordInvalidError } from '../../domain/errors/old-password-invalid'
+import { OldPasswordRequiredError } from '../../domain/errors/old-password-required'
 
 describe('UpdateUserUseCase', () => {
 	let hasher: Hasher
@@ -157,7 +157,7 @@ describe('UpdateUserUseCase', () => {
 				name: 'John Doe',
 				email: 'john.doe@example.com',
 				password: 'Test@1234',
-				oldPassword: 'Test@abc',
+				oldPassword: 'Teste@111',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
 			},
@@ -453,7 +453,9 @@ describe('UpdateUserUseCase', () => {
 			),
 		)
 
-		const data = {
+		const oldData = { ...user.props }
+
+		const newData = {
 			name: 'John Doe 1',
 			email: 'john.doe1@example.com',
 			password: 'Test@1234',
@@ -463,23 +465,22 @@ describe('UpdateUserUseCase', () => {
 		}
 
 		const result = await updateUserUseCase.execute(
-			data,
+			newData,
 			user.props.id as number,
 		)
 
 		const userUpdated = userRepository.users[1]
-
 		expect(result.isRight()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserEntity)
-		expect(userUpdated.name).toBe(data.name)
-		expect(userUpdated.email).toBe(data.email)
-		expect(userUpdated.password).not.toBe(user.password)
+		expect(userUpdated.name).toBe(newData.name)
+		expect(userUpdated.email).toBe(newData.email)
+		expect(userUpdated.password).not.toBe(oldData.password)
 
 		void expect(
-			hasher.compare(data.password, userUpdated.password ?? ''),
+			hasher.compare(newData.password, userUpdated.password ?? ''),
 		).resolves.toBe(true)
 
-		expect(userUpdated.sessionStatus).toBe(data.sessionStatus)
-		expect(userUpdated.status).toBe(data.status)
+		expect(userUpdated.sessionStatus).toBe(newData.sessionStatus)
+		expect(userUpdated.status).toBe(newData.status)
 	})
 })

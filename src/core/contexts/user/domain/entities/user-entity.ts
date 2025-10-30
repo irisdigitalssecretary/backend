@@ -3,6 +3,15 @@ import { Entity } from '@shared/domain/base/entity'
 import { PasswordHash } from '../../../../shared/domain/value-objects/password-hash'
 import { UniqueEntityId } from '@shared/domain/value-objects/unique-entity-id'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
+import { Hasher } from '@/core/shared/domain/infra/services/hasher'
+import { OldPasswordRequiredError } from '../errors/old-password-required'
+import { OldPasswordInvalidError } from '../errors/old-password-invalid'
+
+interface UpdatePasswordEntityProps {
+	hasher: Hasher
+	newPassword: string
+	oldPassword?: string
+}
 
 export enum SessionStatus {
 	ONLINE = 'online',
@@ -92,6 +101,31 @@ export class UserEntity extends Entity<UserEntityProps> {
 
 	public get props() {
 		return this._props || {}
+	}
+
+	public set props(props: UserEntityProps) {
+		this._props = props
+	}
+
+	public async updatePassword({
+		hasher,
+		newPassword,
+		oldPassword,
+	}: UpdatePasswordEntityProps) {
+		if (!oldPassword) {
+			throw new OldPasswordRequiredError()
+		}
+
+		const isOldPasswordValid = await hasher.compare(
+			oldPassword,
+			this.password!,
+		)
+
+		if (!isOldPasswordValid) {
+			throw new OldPasswordInvalidError()
+		}
+
+		this.props.password = await PasswordHash.create(newPassword, hasher)
 	}
 
 	public static create(
