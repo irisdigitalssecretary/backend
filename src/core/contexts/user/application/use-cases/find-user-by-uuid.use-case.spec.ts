@@ -3,7 +3,7 @@ import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserEntity } from '../../domain/entities/user-entity'
-import { UserNotFoundError } from './errors/user-not-found'
+import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { FindUserByIdUseCase } from './find-user-by-uuid.use-case'
 

@@ -2,7 +2,9 @@ import { z } from 'zod'
 
 export const createUserSchema = z.object({
 	name: z.string(),
-	email: z.email('E-mail inválido.'),
+	email: z
+		.email('E-mail inválido.')
+		.max(100, 'E-mail deve possuir no máximo 100 caracteres.'),
 	password: z.string(),
 	phone: z
 		.string()

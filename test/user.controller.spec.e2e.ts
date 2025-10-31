@@ -89,8 +89,15 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server).post('/users').send(newUser)
 		expect(response.status).toBe(400)
+		console.log(response.body, 'boceta')
 		expect(response.body).toMatchObject({
-			message: 'E-mail inválido.',
+			errors: [
+				{
+					code: 'invalid_format',
+					message: 'E-mail inválido.',
+					path: ['email'],
+				},
+			],
 		})
 	})
 })

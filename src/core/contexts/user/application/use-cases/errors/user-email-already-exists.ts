@@ -1,4 +1,4 @@
-import { ApplicationError } from '@/core/shared/application/errors/application-error'
+import { ApplicationError } from '@/core/shared/application/base/application-error'
 
 export class UserEmailExistsError extends ApplicationError {
 	constructor() {
