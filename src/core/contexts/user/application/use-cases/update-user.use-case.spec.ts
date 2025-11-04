@@ -3,11 +3,7 @@ import { UpdateUserUseCase } from './update-user.use-case'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
-import {
-	SessionStatus,
-	UserEntity,
-	UserStatus,
-} from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { InvalidPasswordError } from '@/core/shared/domain/errors/invalid-password-error'
@@ -15,6 +11,8 @@ import { UserNotFoundError } from '../../../../shared/application/errors/user-no
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { OldPasswordInvalidError } from '../../domain/errors/old-password-invalid'
 import { OldPasswordRequiredError } from '../../domain/errors/old-password-required'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 
 describe('UpdateUserUseCase', () => {
 	let hasher: Hasher
@@ -28,6 +26,65 @@ describe('UpdateUserUseCase', () => {
 	beforeEach(() => {
 		userRepository = new InMemoryUserRepository()
 		updateUserUseCase = new UpdateUserUseCase(userRepository, hasher)
+	})
+
+	it('should be able to update a user', async () => {
+		await userRepository.create(
+			await makeUserEntity(
+				{
+					name: 'John Doe',
+					email: 'john.doe2@example.com',
+					password: 'Test@123',
+					sessionStatus: SessionStatus.ONLINE,
+					status: UserStatus.ACTIVE,
+				},
+				hasher,
+			),
+		)
+
+		const user = await userRepository.create(
+			await makeUserEntity(
+				{
+					name: 'John Doe',
+					email: 'john.doe@example.com',
+					password: 'Test@123',
+					sessionStatus: SessionStatus.ONLINE,
+					status: UserStatus.ACTIVE,
+				},
+				hasher,
+			),
+		)
+
+		const oldData = { ...user.props }
+
+		const newData = {
+			name: 'John Doe 1',
+			email: 'john.doe1@example.com',
+			password: 'Test@1234',
+			oldPassword: 'Test@123',
+			sessionStatus: SessionStatus.AWAY,
+			status: UserStatus.INACTIVE,
+		}
+
+		const result = await updateUserUseCase.execute(
+			newData,
+			user.props.id as number,
+		)
+
+		const userUpdated = userRepository.users[1]
+		expect(result.isRight()).toBe(true)
+		expect(result.value).toBeInstanceOf(UserEntity)
+		expect(userUpdated).toMatchObject({
+			name: newData.name,
+			email: newData.email,
+			password: expect.any(String),
+			sessionStatus: newData.sessionStatus,
+			status: newData.status,
+		})
+		expect(userUpdated.password).not.toBe(oldData.password)
+		void expect(
+			hasher.compare(newData.password, userUpdated.password ?? ''),
+		).resolves.toBe(true)
 	})
 
 	it('should not be able to update a user if the user not exists', async () => {
@@ -45,6 +102,7 @@ describe('UpdateUserUseCase', () => {
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toMatchObject({
+			message: 'Usuário não encontrado.',
 			statusCode: 404,
 		})
 		expect(result.value).toBeInstanceOf(UserNotFoundError)
@@ -99,11 +157,12 @@ describe('UpdateUserUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserEmailExistsError)
 		expect(result.value).toMatchObject({
+			message: 'Já existe um usuário com este email cadastrado',
 			statusCode: 409,
 		})
 	})
 
-	it('should not be able to update a user if the old password not exists and the password is provided', async () => {
+	it('should not be able to update a user if the old password is not provided and the password is provided', async () => {
 		const user = await userRepository.create(
 			await makeUserEntity(
 				{
@@ -131,6 +190,7 @@ describe('UpdateUserUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(OldPasswordRequiredError)
 		expect(result.value).toMatchObject({
+			message: 'A senha atual é obrigatória para atualizar a senha.',
 			statusCode: 401,
 		})
 		void expect(
@@ -167,6 +227,7 @@ describe('UpdateUserUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(OldPasswordInvalidError)
 		expect(result.value).toMatchObject({
+			message: 'A senha atual é inválida.',
 			statusCode: 401,
 		})
 		void expect(
@@ -174,7 +235,7 @@ describe('UpdateUserUseCase', () => {
 		).resolves.toBe(true)
 	})
 
-	it('should not be able to update a user if the password is invalid', async () => {
+	it('should not be able to update a user if the password without uppercase letter', async () => {
 		const user = await userRepository.create(
 			await makeUserEntity(
 				{
@@ -203,6 +264,44 @@ describe('UpdateUserUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidPasswordError)
 		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir pelo menos uma letra maiúscula.',
+			statusCode: 400,
+		})
+		void expect(
+			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
+		).resolves.toBe(true)
+	})
+
+	it('should not be able to update a user if the password without number', async () => {
+		const user = await userRepository.create(
+			await makeUserEntity(
+				{
+					name: 'John Doe',
+					email: 'john.doe@example.com',
+					password: 'Test@123',
+					sessionStatus: SessionStatus.ONLINE,
+					status: UserStatus.ACTIVE,
+				},
+				hasher,
+			),
+		)
+
+		const result = await updateUserUseCase.execute(
+			{
+				name: 'John Doe',
+				email: 'john.doe@example.com',
+				password: '@#$%&Abcdefg',
+				oldPassword: 'Test@123',
+				sessionStatus: SessionStatus.ONLINE,
+				status: UserStatus.ACTIVE,
+			},
+			user.props.id as number,
+		)
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir pelo menos um número.',
 			statusCode: 400,
 		})
 		void expect(
@@ -239,6 +338,7 @@ describe('UpdateUserUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidPasswordError)
 		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir no mínimo 8 caracteres.',
 			statusCode: 400,
 		})
 		void expect(
@@ -246,7 +346,7 @@ describe('UpdateUserUseCase', () => {
 		).resolves.toBe(true)
 	})
 
-	it('should not be able to update a user with a password with more than 16 characters', async () => {
+	it('should not be able to update a user with a password longer than 16 characters', async () => {
 		const user = await userRepository.create(
 			await makeUserEntity(
 				{
@@ -275,78 +375,7 @@ describe('UpdateUserUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidPasswordError)
 		expect(result.value).toMatchObject({
-			statusCode: 400,
-		})
-		void expect(
-			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
-		).resolves.toBe(true)
-	})
-
-	it('should not be able to update a user with a password without uppercase letter', async () => {
-		const user = await userRepository.create(
-			await makeUserEntity(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const result = await updateUserUseCase.execute(
-			{
-				name: 'John Doe',
-				email: 'john.doe@example.com',
-				password: 'test@123',
-				oldPassword: 'Test@123',
-				sessionStatus: SessionStatus.ONLINE,
-				status: UserStatus.ACTIVE,
-			},
-			user.props.id as number,
-		)
-
-		expect(result.isLeft()).toBe(true)
-		expect(result.value).toBeInstanceOf(InvalidPasswordError)
-		expect(result.value).toMatchObject({
-			statusCode: 400,
-		})
-		void expect(
-			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
-		).resolves.toBe(true)
-	})
-
-	it('should not be able to update a user with a password without number', async () => {
-		const user = await userRepository.create(
-			await makeUserEntity(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const result = await updateUserUseCase.execute(
-			{
-				name: 'John Doe',
-				email: 'john.doe@example.com',
-				password: 'Test@abcd',
-				oldPassword: 'Test@123',
-				sessionStatus: SessionStatus.ONLINE,
-				status: UserStatus.ACTIVE,
-			},
-			user.props.id as number,
-		)
-
-		expect(result.isLeft()).toBe(true)
-		expect(result.value).toBeInstanceOf(InvalidPasswordError)
-		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir no máximo 16 caracteres.',
 			statusCode: 400,
 		})
 		void expect(
@@ -383,6 +412,7 @@ describe('UpdateUserUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidPasswordError)
 		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir pelo menos um caractere especial.',
 			statusCode: 400,
 		})
 		void expect(
@@ -419,68 +449,11 @@ describe('UpdateUserUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidEmailError)
 		expect(result.value).toMatchObject({
+			message: 'E-mail inválido',
 			statusCode: 400,
 		})
 		void expect(
 			hasher.compare('Test@123', userRepository.users[0].password ?? ''),
 		).resolves.toBe(true)
-	})
-
-	it('should be able to update a user', async () => {
-		await userRepository.create(
-			await makeUserEntity(
-				{
-					name: 'John Doe',
-					email: 'john.doe2@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const user = await userRepository.create(
-			await makeUserEntity(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const oldData = { ...user.props }
-
-		const newData = {
-			name: 'John Doe 1',
-			email: 'john.doe1@example.com',
-			password: 'Test@1234',
-			oldPassword: 'Test@123',
-			sessionStatus: SessionStatus.AWAY,
-			status: UserStatus.INACTIVE,
-		}
-
-		const result = await updateUserUseCase.execute(
-			newData,
-			user.props.id as number,
-		)
-
-		const userUpdated = userRepository.users[1]
-		expect(result.isRight()).toBe(true)
-		expect(result.value).toBeInstanceOf(UserEntity)
-		expect(userUpdated.name).toBe(newData.name)
-		expect(userUpdated.email).toBe(newData.email)
-		expect(userUpdated.password).not.toBe(oldData.password)
-
-		void expect(
-			hasher.compare(newData.password, userUpdated.password ?? ''),
-		).resolves.toBe(true)
-
-		expect(userUpdated.sessionStatus).toBe(newData.sessionStatus)
-		expect(userUpdated.status).toBe(newData.status)
 	})
 })

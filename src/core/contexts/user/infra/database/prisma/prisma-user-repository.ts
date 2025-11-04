@@ -2,16 +2,14 @@ import {
 	UserFilters,
 	UserRepository,
 } from '../../../domain/repositories/user-repository'
-import {
-	SessionStatus,
-	UserEntity,
-	UserStatus,
-} from '../../../domain/entities/user-entity'
+import { UserEntity } from '../../../domain/entities/user.entity'
 import { UserMapper } from '../mappers/user.mapper'
 import { FindManyOptions } from '@shared/domain/utils/find-many'
 import { OffsetPagination } from '@shared/domain/utils/offset-pagination'
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {

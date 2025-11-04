@@ -1,14 +1,12 @@
 import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
-import {
-	SessionStatus,
-	UserEntity,
-	UserStatus,
-} from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import {
 	UserFilters,
 	UserRepository,
 } from '../../domain/repositories/user-repository'
 import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 
 export class InMemoryUserRepository implements UserRepository {
 	public readonly users: UserEntity[] = []

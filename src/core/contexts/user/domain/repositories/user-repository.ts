@@ -1,6 +1,8 @@
 import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
-import { SessionStatus, UserEntity, UserStatus } from '../entities/user-entity'
+import { UserEntity } from '../entities/user.entity'
 import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 
 export interface UserFilters {
 	name?: string

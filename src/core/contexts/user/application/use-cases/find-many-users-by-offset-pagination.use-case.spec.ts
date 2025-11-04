@@ -2,14 +2,12 @@ import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.s
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
-import {
-	UserEntity,
-	UserStatus,
-	SessionStatus,
-} from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { FindManyUsersByOffsetPaginationUseCase } from './find-many-users-by-offset-pagination.use-case'
 import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 
 describe('FindManyUsersByOffsetPaginationUseCase', () => {
 	let hasher: Hasher

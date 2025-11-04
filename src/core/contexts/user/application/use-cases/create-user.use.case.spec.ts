@@ -3,7 +3,7 @@ import { CreateUserUseCase } from './create-user.use-case'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
-import { UserEntity } from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { InvalidPasswordError } from '@/core/shared/domain/errors/invalid-password-error'
@@ -37,6 +37,10 @@ describe('CreateUserUseCase', () => {
 		expect(result.value).toBeInstanceOf(UserEntity)
 		expect(userRepository.users.length).toBe(1)
 		expect(user).toBeInstanceOf(UserEntity)
+		expect(user).toMatchObject({
+			email: 'john.doe@example.com',
+			name: 'John Doe',
+		})
 		expect(user?.password).not.toBe(data.password)
 		void expect(
 			hasher.compare(data.password, user?.password ?? ''),
@@ -58,6 +62,10 @@ describe('CreateUserUseCase', () => {
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserEmailExistsError)
+		expect(result.value).toMatchObject({
+			message: 'Já existe um usuário com este email cadastrado',
+			statusCode: 409,
+		})
 		expect(userRepository.users.length).toBe(1)
 	})
 
@@ -70,10 +78,30 @@ describe('CreateUserUseCase', () => {
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidEmailError)
+		expect(result.value).toMatchObject({
+			message: 'E-mail inválido',
+			statusCode: 400,
+		})
 		expect(userRepository.users.length).toBe(0)
 	})
 
-	it('should not be able to create a user with an password with less than 8 characters', async () => {
+	it('should not be able to create a user with an email longer than 100 characters', async () => {
+		const result = await createUserUseCase.execute({
+			name: 'John Doe',
+			email: 'a'.repeat(90) + '@example.com',
+			password: 'Teste@123',
+		})
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidEmailError)
+		expect(result.value).toMatchObject({
+			message: 'E-mail deve possuir no máximo 100 caracteres.',
+			statusCode: 400,
+		})
+		expect(userRepository.users.length).toBe(0)
+	})
+
+	it('should not be able to create a user with a password with less than 8 characters', async () => {
 		const result = await createUserUseCase.execute({
 			name: 'John Doe',
 			email: 'john.doe@example.com',
@@ -82,10 +110,14 @@ describe('CreateUserUseCase', () => {
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir no mínimo 8 caracteres.',
+			statusCode: 400,
+		})
 		expect(userRepository.users.length).toBe(0)
 	})
 
-	it('should not be able to create a user with an password with more than 16 characters', async () => {
+	it('should not be able to create a user with a password longer than 16 characters', async () => {
 		const result = await createUserUseCase.execute({
 			name: 'John Doe',
 			email: 'john.doe@example.com',
@@ -94,10 +126,62 @@ describe('CreateUserUseCase', () => {
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir no máximo 16 caracteres.',
+			statusCode: 400,
+		})
 		expect(userRepository.users.length).toBe(0)
 	})
 
-	it('should not be able to create a user with an phone with more than 16 characters', async () => {
+	it('should not be able to create a user with a password without uppercase letter', async () => {
+		const result = await createUserUseCase.execute({
+			name: 'John Doe',
+			email: 'john.doe@example.com',
+			password: '1234abcd',
+		})
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir pelo menos uma letra maiúscula.',
+			statusCode: 400,
+		})
+		expect(userRepository.users.length).toBe(0)
+	})
+
+	it('should not be able to create a user with a password without number', async () => {
+		const result = await createUserUseCase.execute({
+			name: 'John Doe',
+			email: 'john.doe@example.com',
+			password: '@#$%&Abcdefg',
+		})
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir pelo menos um número.',
+			statusCode: 400,
+		})
+		expect(userRepository.users.length).toBe(0)
+	})
+
+	it('should not be able to create a user with a password without special character', async () => {
+		const result = await createUserUseCase.execute({
+			name: 'John Doe',
+			email: 'john.doe@example.com',
+			password: 'Test123567',
+		})
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPasswordError)
+		expect(result.value).toMatchObject({
+			message: 'Senha deve possuir pelo menos um caractere especial.',
+			statusCode: 400,
+		})
+		expect(userRepository.users.length).toBe(0)
+	})
+
+	it('should not be able to create a user with an phone longer than 16 characters', async () => {
 		const result = await createUserUseCase.execute({
 			name: 'John Doe',
 			email: 'john.doe@example.com',
@@ -107,42 +191,27 @@ describe('CreateUserUseCase', () => {
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(InvalidPhoneError)
+		expect(result.value).toMatchObject({
+			message: 'Telefone deve possuir no máximo 16 caracteres.',
+			statusCode: 400,
+		})
 		expect(userRepository.users.length).toBe(0)
 	})
 
-	it('should not be able to create a user with an password without uppercase letter', async () => {
+	it('should not be able to create a user with a phone number less than 10 characters', async () => {
 		const result = await createUserUseCase.execute({
 			name: 'John Doe',
 			email: 'john.doe@example.com',
-			password: '1234abcd',
+			password: 'Teste@123',
+			phone: '123456789',
 		})
 
 		expect(result.isLeft()).toBe(true)
-		expect(result.value).toBeInstanceOf(InvalidPasswordError)
-		expect(userRepository.users.length).toBe(0)
-	})
-
-	it('should not be able to create a user with an password without number', async () => {
-		const result = await createUserUseCase.execute({
-			name: 'John Doe',
-			email: 'john.doe@example.com',
-			password: '@#$%&abcdefg',
+		expect(result.value).toBeInstanceOf(InvalidPhoneError)
+		expect(result.value).toMatchObject({
+			message: 'Telefone deve possuir no mínimo 10 caracteres.',
+			statusCode: 400,
 		})
-
-		expect(result.isLeft()).toBe(true)
-		expect(result.value).toBeInstanceOf(InvalidPasswordError)
-		expect(userRepository.users.length).toBe(0)
-	})
-
-	it('should not be able to create a user with an password without special character', async () => {
-		const result = await createUserUseCase.execute({
-			name: 'John Doe',
-			email: 'john.doe@example.com',
-			password: 'Test123567',
-		})
-
-		expect(result.isLeft()).toBe(true)
-		expect(result.value).toBeInstanceOf(InvalidPasswordError)
 		expect(userRepository.users.length).toBe(0)
 	})
 })

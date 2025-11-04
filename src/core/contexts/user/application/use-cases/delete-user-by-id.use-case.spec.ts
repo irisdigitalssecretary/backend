@@ -28,6 +28,7 @@ describe('DeleteUserByIdUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserNotFoundError)
 		expect(result.value).toMatchObject({
+			message: 'Usuário não encontrado.',
 			statusCode: 404,
 		})
 		expect(

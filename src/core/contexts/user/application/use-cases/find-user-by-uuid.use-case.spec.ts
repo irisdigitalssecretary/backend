@@ -2,7 +2,7 @@ import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.s
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
-import { UserEntity } from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { FindUserByIdUseCase } from './find-user-by-uuid.use-case'
@@ -29,6 +29,7 @@ describe('FindUserByIdUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserNotFoundError)
 		expect(result.value).toMatchObject({
+			message: 'Usuário não encontrado.',
 			statusCode: 404,
 		})
 		expect(userRepository.users.length).toBe(0)
@@ -61,8 +62,10 @@ describe('FindUserByIdUseCase', () => {
 
 		const user = result.value
 		expect(user).toBeInstanceOf(UserEntity)
-		expect(user.uuid).toBe(uuid)
-		expect(user.email).toBe('john.doe@example.com')
-		expect(user.name).toBe('John Doe')
+		expect(user).toMatchObject({
+			uuid,
+			email: 'john.doe@example.com',
+			name: 'John Doe',
+		})
 	})
 })

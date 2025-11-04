@@ -6,23 +6,13 @@ import { Phone } from '@/core/shared/domain/value-objects/phone'
 import { Hasher } from '@/core/shared/domain/infra/services/hasher'
 import { OldPasswordRequiredError } from '../errors/old-password-required'
 import { OldPasswordInvalidError } from '../errors/old-password-invalid'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 
 interface UpdatePasswordEntityProps {
 	hasher: Hasher
 	newPassword: string
 	oldPassword?: string
-}
-
-export enum SessionStatus {
-	ONLINE = 'online',
-	AWAY = 'away',
-	BUSY = 'busy',
-	OFFLINE = 'offline',
-}
-
-export enum UserStatus {
-	ACTIVE = 'active',
-	INACTIVE = 'inactive',
 }
 
 export interface UserEntityProps {

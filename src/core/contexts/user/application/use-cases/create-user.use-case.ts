@@ -1,5 +1,5 @@
 import { UserRepository } from '../../domain/repositories/user-repository'
-import { UserEntity } from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import { Either, left, right } from '@shared/domain/base/either'
 import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { Hasher } from '@shared/domain/infra/services/hasher'

@@ -1,12 +1,10 @@
 import { Email } from '@shared/domain/value-objects/email'
-import {
-	SessionStatus,
-	UserEntity,
-	UserStatus,
-} from '../domain/entities/user-entity'
+import { UserEntity } from '../domain/entities/user.entity'
 import { PasswordHash } from '@shared/domain/value-objects/password-hash'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 
 interface MakeUserEntityProps {
 	id?: number

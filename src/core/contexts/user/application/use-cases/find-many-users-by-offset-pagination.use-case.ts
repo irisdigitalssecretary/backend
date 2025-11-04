@@ -2,7 +2,7 @@ import {
 	UserFilters,
 	UserRepository,
 } from '../../domain/repositories/user-repository'
-import { UserEntity } from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import { Either, right } from '@/core/shared/domain/base/either'
 import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
 import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'

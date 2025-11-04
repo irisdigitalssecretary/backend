@@ -1,9 +1,5 @@
 import { UserRepository } from '../../domain/repositories/user-repository'
-import {
-	SessionStatus,
-	UserEntity,
-	UserStatus,
-} from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import { Either, left, right } from '@shared/domain/base/either'
 import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { Hasher } from '@shared/domain/infra/services/hasher'
@@ -14,12 +10,17 @@ import { OldPasswordInvalidError } from '../../domain/errors/old-password-invali
 import { OldPasswordRequiredError } from '../../domain/errors/old-password-required'
 import { DomainError } from '@/core/shared/domain/base/domain-error'
 import { Email } from '@/core/shared/domain/value-objects/email'
+import { Phone } from '@/core/shared/domain/value-objects/phone'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
+import { Injectable } from '@nestjs/common'
 
 interface UpdateUserUseCaseRequest {
 	name: string
 	email: string
 	password?: string
 	oldPassword?: string
+	phone?: string
 	sessionStatus: SessionStatus
 	status: UserStatus
 }
@@ -33,7 +34,7 @@ type UpdateUserUseCaseResponse = Either<
 	| OldPasswordInvalidError,
 	UserEntity
 >
-
+@Injectable()
 export class UpdateUserUseCase {
 	constructor(
 		private readonly userRepository: UserRepository,
@@ -69,6 +70,7 @@ export class UpdateUserUseCase {
 				name: props.name,
 				sessionStatus: props.sessionStatus,
 				status: props.status,
+				phone: props?.phone ? Phone.create(props.phone) : undefined,
 			}
 
 			if (props.password) {

@@ -1,7 +1,8 @@
 import { UserRepository } from '../../domain/repositories/user-repository'
-import { SessionStatus, UserEntity } from '../../domain/entities/user-entity'
+import { UserEntity } from '../../domain/entities/user.entity'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
 import { Either, left, right } from '@/core/shared/domain/base/either'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 
 interface UpdateUserSessionStatusUseCaseRequest {
 	id: number

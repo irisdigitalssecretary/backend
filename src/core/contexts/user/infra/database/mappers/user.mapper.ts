@@ -1,10 +1,8 @@
 import { User } from '@prisma/client'
 import { makeUserEntity } from '../../../factories/make-user-entity'
-import {
-	SessionStatus,
-	UserEntity,
-	UserStatus,
-} from '@/core/contexts/user/domain/entities/user-entity'
+import { UserEntity } from '@/core/contexts/user/domain/entities/user.entity'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 
 export class UserMapper {
 	static async toDomain(user: User): Promise<UserEntity> {

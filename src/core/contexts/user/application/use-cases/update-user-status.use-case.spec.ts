@@ -5,7 +5,7 @@ import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-rep
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
 import { makeUserEntity } from '../../factories/make-user-entity'
 import { UpdateUserStatusUseCase } from './update-user-status.use-case'
-import { UserStatus } from '../../domain/entities/user-entity'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 
 describe('UpdateUserStatusUseCase', () => {
 	let hasher: Hasher
@@ -30,6 +30,7 @@ describe('UpdateUserStatusUseCase', () => {
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserNotFoundError)
 		expect(result.value).toMatchObject({
+			message: 'Usuário não encontrado.',
 			statusCode: 404,
 		})
 		expect(

@@ -5,11 +5,13 @@ import { UserRepository } from './domain/repositories/user-repository'
 import { PrismaUserRepository } from './infra/database/prisma/prisma-user-repository'
 import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.service'
 import { Hasher } from '@/core/shared/domain/infra/services/hasher'
+import { UpdateUserUseCase } from './application/use-cases/update-user.use-case'
 
 @Module({
 	controllers: [UserController],
 	providers: [
 		CreateUserUseCase,
+		UpdateUserUseCase,
 		{
 			provide: UserRepository,
 			useClass: PrismaUserRepository,
