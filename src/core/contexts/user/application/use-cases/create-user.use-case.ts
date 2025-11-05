@@ -5,7 +5,7 @@ import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password-error'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
-import { makeUserEntity } from '../../factories/make-user-entity'
+import { UserFactory } from '../../factories/make-user-entity'
 import { Injectable } from '@nestjs/common'
 import { DomainError } from '@/core/shared/domain/base/domain-error'
 
@@ -40,7 +40,7 @@ export class CreateUserUseCase {
 		}
 
 		try {
-			const user = await makeUserEntity(props, this.hasher)
+			const user = await UserFactory.create(props, this.hasher)
 
 			const result = await this.userRepository.create(user)
 			return right(result)

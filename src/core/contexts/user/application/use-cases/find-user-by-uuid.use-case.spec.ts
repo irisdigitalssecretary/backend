@@ -4,13 +4,13 @@ import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserEntity } from '../../domain/entities/user.entity'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
-import { makeUserEntity } from '../../factories/make-user-entity'
-import { FindUserByIdUseCase } from './find-user-by-uuid.use-case'
+import { UserFactory } from '../../factories/make-user-entity'
+import { FindUserByUuidUseCase } from './find-user-by-uuid.use-case'
 
-describe('FindUserByIdUseCase', () => {
+describe('FindUserByUuidUseCase', () => {
 	let hasher: Hasher
 	let userRepository: UserRepository
-	let findUserByIdUseCase: FindUserByIdUseCase
+	let findUserByUuidUseCase: FindUserByUuidUseCase
 
 	beforeAll(() => {
 		hasher = new BcryptHasher()
@@ -18,11 +18,11 @@ describe('FindUserByIdUseCase', () => {
 
 	beforeEach(() => {
 		userRepository = new InMemoryUserRepository()
-		findUserByIdUseCase = new FindUserByIdUseCase(userRepository)
+		findUserByUuidUseCase = new FindUserByUuidUseCase(userRepository)
 	})
 
 	it('should not be able to find a user if it does not exist', async () => {
-		const result = await findUserByIdUseCase.execute({
+		const result = await findUserByUuidUseCase.execute({
 			uuid: 'non-existent-uuid',
 		})
 
@@ -39,7 +39,7 @@ describe('FindUserByIdUseCase', () => {
 		const uuid = '123e4567-e89b-12d3-a456-426614174000'
 
 		await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					uuid,
 					name: 'John Doe',
@@ -52,7 +52,7 @@ describe('FindUserByIdUseCase', () => {
 
 		expect(userRepository.users.length).toBe(1)
 
-		const result = await findUserByIdUseCase.execute({ uuid })
+		const result = await findUserByUuidUseCase.execute({ uuid })
 
 		expect(result.isRight()).toBe(true)
 

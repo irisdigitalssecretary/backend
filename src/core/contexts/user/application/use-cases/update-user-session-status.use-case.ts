@@ -3,6 +3,7 @@ import { UserEntity } from '../../domain/entities/user.entity'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
 import { Either, left, right } from '@/core/shared/domain/base/either'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { Injectable } from '@nestjs/common'
 
 interface UpdateUserSessionStatusUseCaseRequest {
 	id: number
@@ -14,6 +15,7 @@ type UpdateUserSessionStatusUseCaseResponse = Either<
 	UserEntity
 >
 
+@Injectable()
 export class UpdateUserSessionStatusUseCase {
 	constructor(private readonly userRepository: UserRepository) {}
 

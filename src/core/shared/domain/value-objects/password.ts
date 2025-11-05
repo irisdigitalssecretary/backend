@@ -2,11 +2,11 @@ import { ValueObject } from '@shared/domain/base/value-object'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { InvalidPasswordError } from '../errors/invalid-password-error'
 
-interface PasswordHashProps {
+interface PasswordProps {
 	hashedPassword: string
 }
 
-export class PasswordHash extends ValueObject<PasswordHashProps> {
+export class Password extends ValueObject<PasswordProps> {
 	constructor(hashedPassword: string) {
 		super({ hashedPassword })
 	}
@@ -15,13 +15,19 @@ export class PasswordHash extends ValueObject<PasswordHashProps> {
 		return this.props.hashedPassword
 	}
 
+	public static fromHash(password: string): Password {
+		return new Password(password)
+	}
+
 	public static async create(
 		password: string,
-		hasher: Hasher,
-	): Promise<PasswordHash> {
+		hasher?: Hasher,
+	): Promise<Password | undefined> {
+		if (!hasher) return undefined
+
 		this.validate(password)
 		const hashedPassword = await hasher.hash(password)
-		return new PasswordHash(hashedPassword)
+		return new Password(hashedPassword)
 	}
 
 	private static validate(password: string): void {

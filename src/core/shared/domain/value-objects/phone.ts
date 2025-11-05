@@ -13,6 +13,10 @@ export class Phone extends ValueObject<{ value: string }> {
 		return this.props.value
 	}
 
+	public static fromString(phone: string): Phone {
+		return new Phone(phone)
+	}
+
 	public static create(phone: string): Phone {
 		this.validate(phone)
 

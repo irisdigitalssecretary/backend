@@ -8,7 +8,7 @@ import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { InvalidPasswordError } from '@/core/shared/domain/errors/invalid-password-error'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
-import { makeUserEntity } from '../../factories/make-user-entity'
+import { UserFactory } from '../../factories/make-user-entity'
 import { OldPasswordInvalidError } from '../../domain/errors/old-password-invalid'
 import { OldPasswordRequiredError } from '../../domain/errors/old-password-required'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
@@ -30,7 +30,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should be able to update a user', async () => {
 		await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe2@example.com',
@@ -43,7 +43,7 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -60,6 +60,65 @@ describe('UpdateUserUseCase', () => {
 		const newData = {
 			name: 'John Doe 1',
 			email: 'john.doe1@example.com',
+			password: 'Test@1234',
+			oldPassword: 'Test@123',
+			sessionStatus: SessionStatus.AWAY,
+			status: UserStatus.INACTIVE,
+		}
+
+		const result = await updateUserUseCase.execute(
+			newData,
+			user.props.id as number,
+		)
+
+		const userUpdated = userRepository.users[1]
+		expect(result.isRight()).toBe(true)
+		expect(result.value).toBeInstanceOf(UserEntity)
+		expect(userUpdated).toMatchObject({
+			name: newData.name,
+			email: newData.email,
+			password: expect.any(String),
+			sessionStatus: newData.sessionStatus,
+			status: newData.status,
+		})
+		expect(userUpdated.password).not.toBe(oldData.password)
+		void expect(
+			hasher.compare(newData.password, userUpdated.password ?? ''),
+		).resolves.toBe(true)
+	})
+
+	it('should be able to update a user keeping the same email', async () => {
+		await userRepository.create(
+			await UserFactory.create(
+				{
+					name: 'John Doe',
+					email: 'john.doe2@example.com',
+					password: 'Test@123',
+					sessionStatus: SessionStatus.ONLINE,
+					status: UserStatus.ACTIVE,
+				},
+				hasher,
+			),
+		)
+
+		const user = await userRepository.create(
+			await UserFactory.create(
+				{
+					name: 'John Doe',
+					email: 'john.doe@example.com',
+					password: 'Test@123',
+					sessionStatus: SessionStatus.ONLINE,
+					status: UserStatus.ACTIVE,
+				},
+				hasher,
+			),
+		)
+
+		const oldData = { ...user.props }
+
+		const newData = {
+			name: 'John Doe 1',
+			email: 'john.doe@example.com',
 			password: 'Test@1234',
 			oldPassword: 'Test@123',
 			sessionStatus: SessionStatus.AWAY,
@@ -113,7 +172,7 @@ describe('UpdateUserUseCase', () => {
 		const emailToUpdate = 'john.doe@example.com'
 
 		await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: emailToUpdate,
@@ -126,7 +185,7 @@ describe('UpdateUserUseCase', () => {
 		)
 
 		const user2 = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe2@example.com',
@@ -164,7 +223,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should not be able to update a user if the old password is not provided and the password is provided', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -200,7 +259,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should not be able to update a user if the old password is invalid', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -237,7 +296,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should not be able to update a user if the password without uppercase letter', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -274,7 +333,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should not be able to update a user if the password without number', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -311,7 +370,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should not be able to update a user with a password with less than 8 characters', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -348,7 +407,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should not be able to update a user with a password longer than 16 characters', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -385,7 +444,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should not be able to update a user with a password without special character', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -422,7 +481,7 @@ describe('UpdateUserUseCase', () => {
 
 	it('should not be able to update a user if the email is invalid', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',

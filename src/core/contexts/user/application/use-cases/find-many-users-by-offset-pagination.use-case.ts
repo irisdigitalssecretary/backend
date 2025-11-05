@@ -6,6 +6,7 @@ import { UserEntity } from '../../domain/entities/user.entity'
 import { Either, right } from '@/core/shared/domain/base/either'
 import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
 import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
+import { Injectable } from '@nestjs/common'
 
 type FindManyUsersByOffsetPaginationUseCaseRequest = FindManyOptions<
 	UserFilters,
@@ -14,6 +15,7 @@ type FindManyUsersByOffsetPaginationUseCaseRequest = FindManyOptions<
 
 type FindManyUsersByOffsetPaginationUseCaseResponse = Either<null, UserEntity[]>
 
+@Injectable()
 export class FindManyUsersByOffsetPaginationUseCase {
 	constructor(private readonly userRepository: UserRepository) {}
 

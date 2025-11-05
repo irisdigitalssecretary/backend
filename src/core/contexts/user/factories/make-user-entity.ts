@@ -1,6 +1,6 @@
 import { Email } from '@shared/domain/value-objects/email'
 import { UserEntity } from '../domain/entities/user.entity'
-import { PasswordHash } from '@shared/domain/value-objects/password-hash'
+import { Password } from '@/core/shared/domain/value-objects/password'
 import { Hasher } from '@shared/domain/infra/services/hasher'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
@@ -19,6 +19,36 @@ interface MakeUserEntityProps {
 	updatedAt?: Date
 }
 
+export class UserFactory {
+	static async create(props: MakeUserEntityProps, hasher?: Hasher) {
+		return UserEntity.create({
+			...props,
+			uuid: props.uuid,
+			email: Email.create(props.email),
+			phone: props.phone ? Phone.create(props.phone) : undefined,
+			password: props.password
+				? await Password.create(props.password, hasher)
+				: undefined,
+			createdAt: props.createdAt || new Date(),
+			updatedAt: props.updatedAt || new Date(),
+		})
+	}
+
+	static reconstitute(props: MakeUserEntityProps) {
+		return UserEntity.create({
+			...props,
+			uuid: props.uuid,
+			email: Email.create(props.email),
+			phone: props.phone ? Phone.fromString(props.phone) : undefined,
+			password: props.password
+				? Password.fromHash(props.password)
+				: undefined,
+			createdAt: props.createdAt || new Date(),
+			updatedAt: props.updatedAt || new Date(),
+		})
+	}
+}
+
 export async function makeUserEntity(
 	props: MakeUserEntityProps,
 	hasher?: Hasher,
@@ -28,10 +58,9 @@ export async function makeUserEntity(
 		uuid: props.uuid,
 		email: Email.create(props.email),
 		phone: props.phone ? Phone.create(props.phone) : undefined,
-		password:
-			props.password && hasher
-				? await PasswordHash.create(props.password, hasher)
-				: undefined,
+		password: props.password
+			? await Password.create(props.password, hasher)
+			: undefined,
 		createdAt: props.createdAt || new Date(),
 		updatedAt: props.updatedAt || new Date(),
 	})

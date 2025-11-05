@@ -3,7 +3,7 @@ import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
-import { makeUserEntity } from '../../factories/make-user-entity'
+import { UserFactory } from '../../factories/make-user-entity'
 import { DeleteUserByIdUseCase } from './delete-user-by-id.use-case'
 
 describe('DeleteUserByIdUseCase', () => {
@@ -40,7 +40,7 @@ describe('DeleteUserByIdUseCase', () => {
 		const uuid = '123e4567-e89b-12d3-a456-426614174000'
 
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					uuid,
 					name: 'John Doe',

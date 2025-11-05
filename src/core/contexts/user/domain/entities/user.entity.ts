@@ -1,6 +1,6 @@
 import { Email } from '@shared/domain/value-objects/email'
 import { Entity } from '@shared/domain/base/entity'
-import { PasswordHash } from '../../../../shared/domain/value-objects/password-hash'
+import { Password } from '../../../../shared/domain/value-objects/password'
 import { UniqueEntityId } from '@shared/domain/value-objects/unique-entity-id'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
 import { Hasher } from '@/core/shared/domain/infra/services/hasher'
@@ -20,7 +20,7 @@ export interface UserEntityProps {
 	uuid?: string
 	name: string
 	email: Email
-	password?: PasswordHash
+	password?: Password
 	sessionStatus?: SessionStatus
 	status?: UserStatus
 	phone?: Phone
@@ -115,13 +115,13 @@ export class UserEntity extends Entity<UserEntityProps> {
 			throw new OldPasswordInvalidError()
 		}
 
-		this.props.password = await PasswordHash.create(newPassword, hasher)
+		this.props.password = await Password.create(newPassword, hasher)
 	}
 
 	public static create(
 		props: UserEntityProps,
 		id?: UniqueEntityId,
 	): UserEntity {
-		return new UserEntity(props, id || UniqueEntityId.create())
+		return new UserEntity(props, id ?? UniqueEntityId.create())
 	}
 }

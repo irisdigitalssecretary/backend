@@ -13,7 +13,7 @@ model User {
     name          String        @db.VarChar(150)
     email         String        @db.VarChar(100)
     password      String?
-    sessionStatus SessionStatus @default(online)
+    sessionStatus SessionStatus @default(offline)
     status        UserStatus    @default(active)
     phone         String?       @db.VarChar(16)
     createdAt     DateTime      @default(now())

@@ -3,7 +3,7 @@ import { Hasher } from '@shared/domain/infra/services/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
-import { makeUserEntity } from '../../factories/make-user-entity'
+import { UserFactory } from '../../factories/make-user-entity'
 import { UpdateUserStatusUseCase } from './update-user-status.use-case'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 
@@ -40,7 +40,7 @@ describe('UpdateUserStatusUseCase', () => {
 
 	it('should be able to update the user status by id', async () => {
 		const user = await userRepository.create(
-			await makeUserEntity(
+			await UserFactory.create(
 				{
 					name: 'John Doe',
 					email: 'john.doe@example.com',

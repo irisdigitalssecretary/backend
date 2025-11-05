@@ -24,26 +24,27 @@ export class PrismaUserRepository implements UserRepository {
 			data: UserMapper.toPersistence(user),
 		})
 
-		return await UserMapper.toDomain(createdUser)
+		return UserMapper.toDomain(createdUser)
 	}
 
 	async findByEmail(email: string): Promise<UserEntity | null> {
 		const user = await this.prisma.user.findFirst({ where: { email } })
-		return user ? await UserMapper.toDomain(user) : null
+		return user ? UserMapper.toDomain(user) : null
 	}
 
 	async findById(id: number): Promise<UserEntity | null> {
 		const user = await this.prisma.user.findUnique({
 			where: { id },
 		})
-		return user ? await UserMapper.toDomain(user) : null
+
+		return user ? UserMapper.toDomain(user) : null
 	}
 
 	async findByUuid(uuid: string): Promise<UserEntity | null> {
 		const user = await this.prisma.user.findUnique({
 			where: { uuid },
 		})
-		return user ? await UserMapper.toDomain(user) : null
+		return user ? UserMapper.toDomain(user) : null
 	}
 
 	async update(user: UserEntity): Promise<UserEntity> {
@@ -54,7 +55,7 @@ export class PrismaUserRepository implements UserRepository {
 			data: UserMapper.toPersistence(user),
 		})
 
-		return await UserMapper.toDomain(updatedUser)
+		return UserMapper.toDomain(updatedUser)
 	}
 
 	async delete(id: number): Promise<void> {
@@ -70,7 +71,7 @@ export class PrismaUserRepository implements UserRepository {
 			where: { id },
 			data: { status },
 		})
-		return await UserMapper.toDomain(updatedUser)
+		return UserMapper.toDomain(updatedUser)
 	}
 
 	async findManyByOffsetPagination(
@@ -102,6 +103,6 @@ export class PrismaUserRepository implements UserRepository {
 			where: { id },
 			data: { sessionStatus },
 		})
-		return await UserMapper.toDomain(updatedUser)
+		return UserMapper.toDomain(updatedUser)
 	}
 }

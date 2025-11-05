@@ -4,8 +4,12 @@ import { z } from 'zod'
 
 export const updateUserSchema = z.object({
 	name: z.string(),
-	sessionStatus: z.enum(SessionStatus),
-	status: z.enum(UserStatus),
+	sessionStatus: z.enum(SessionStatus, {
+		message: 'Status de sessão inválido.',
+	}),
+	status: z.enum(UserStatus, {
+		message: 'Status inválido.',
+	}),
 	email: z
 		.email('E-mail inválido.')
 		.max(100, 'E-mail deve possuir no máximo 100 caracteres.'),
