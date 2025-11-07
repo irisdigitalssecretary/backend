@@ -33,12 +33,12 @@ export class UserEntity extends Entity<UserEntityProps> {
 		return this.props.uuid || this.id?.value
 	}
 
-	public get sessionStatus(): SessionStatus {
-		return this.props.sessionStatus || SessionStatus.OFFLINE
+	public get sessionStatus(): SessionStatus | undefined {
+		return this.props.sessionStatus || undefined
 	}
 
-	public get status(): UserStatus {
-		return this.props.status || UserStatus.ACTIVE
+	public get status(): UserStatus | undefined {
+		return this.props.status || undefined
 	}
 
 	public get name() {
@@ -122,6 +122,17 @@ export class UserEntity extends Entity<UserEntityProps> {
 		props: UserEntityProps,
 		id?: UniqueEntityId,
 	): UserEntity {
-		return new UserEntity(props, id ?? UniqueEntityId.create())
+		return new UserEntity(
+			{
+				...props,
+				sessionStatus: props.sessionStatus ?? SessionStatus.OFFLINE,
+				status: props.status ?? UserStatus.ACTIVE,
+			},
+			id ?? UniqueEntityId.create(),
+		)
+	}
+
+	public static restore(props: UserEntityProps): UserEntity {
+		return new UserEntity(props, UniqueEntityId.create(props.uuid))
 	}
 }

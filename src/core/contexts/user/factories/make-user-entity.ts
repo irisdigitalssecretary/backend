@@ -21,47 +21,37 @@ interface MakeUserEntityProps {
 
 export class UserFactory {
 	static async create(props: MakeUserEntityProps, hasher?: Hasher) {
+		const password = props.password
+			? await Password.create(props.password, hasher)
+			: undefined
+
+		const phone = props.phone ? Phone.create(props.phone) : undefined
+
 		return UserEntity.create({
 			...props,
 			uuid: props.uuid,
 			email: Email.create(props.email),
-			phone: props.phone ? Phone.create(props.phone) : undefined,
-			password: props.password
-				? await Password.create(props.password, hasher)
-				: undefined,
+			phone,
+			password,
 			createdAt: props.createdAt || new Date(),
 			updatedAt: props.updatedAt || new Date(),
 		})
 	}
 
 	static reconstitute(props: MakeUserEntityProps) {
-		return UserEntity.create({
+		const phone = props.phone ? Phone.fromString(props.phone) : undefined
+		const password = props.password
+			? Password.fromHash(props.password)
+			: undefined
+
+		return UserEntity.restore({
 			...props,
 			uuid: props.uuid,
 			email: Email.create(props.email),
-			phone: props.phone ? Phone.fromString(props.phone) : undefined,
-			password: props.password
-				? Password.fromHash(props.password)
-				: undefined,
+			phone,
+			password,
 			createdAt: props.createdAt || new Date(),
 			updatedAt: props.updatedAt || new Date(),
 		})
 	}
-}
-
-export async function makeUserEntity(
-	props: MakeUserEntityProps,
-	hasher?: Hasher,
-) {
-	return UserEntity.create({
-		...props,
-		uuid: props.uuid,
-		email: Email.create(props.email),
-		phone: props.phone ? Phone.create(props.phone) : undefined,
-		password: props.password
-			? await Password.create(props.password, hasher)
-			: undefined,
-		createdAt: props.createdAt || new Date(),
-		updatedAt: props.updatedAt || new Date(),
-	})
 }
