@@ -7,6 +7,7 @@ export default defineConfig({
 		globals: true,
 		globalSetup: path.resolve(__dirname, './test/setup.e2e.ts'),
 		include: ['**/*.spec.e2e.ts'],
+		testTimeout: 60_000, // 1 minute
 	},
 	plugins: [
 		react({

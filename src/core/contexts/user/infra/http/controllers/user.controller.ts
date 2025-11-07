@@ -30,7 +30,15 @@ import {
 import { DeleteUserByIdUseCase } from '../../../application/use-cases/delete-user-by-id.use-case'
 import { FindUserByUuidUseCase } from '../../../application/use-cases/find-user-by-uuid.use-case'
 import { FindManyUsersByOffsetPaginationUseCase } from '../../../application/use-cases/find-many-users-by-offset-pagination.use-case'
-import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
+import {
+	type FindManyUsersQuery,
+	findManyUsersSchema,
+} from '../dtos/find-many-users.dto'
+import {
+	UserFields,
+	UserSelectableFields,
+} from '../../../domain/repositories/user-repository'
+import { Pagination } from '@/core/shared/application/utils/pagination'
 
 @Controller('users')
 export class UserController {
@@ -181,12 +189,25 @@ export class UserController {
 
 	@Get()
 	async findMany(
-		@Query('filters') filters: ,
-		@Query('pagination') pagination: OffsetPagination,
+		@Query(new ZodValidationPipe(findManyUsersSchema))
+		query: FindManyUsersQuery,
 	) {
-		const result = await this.findManyUsersByOffsetPaginationUseCase.execute({
-			filters,
-			pagination,
-		})
+		const { filters, pagination, orderBy, select } = query
+
+		const result =
+			await this.findManyUsersByOffsetPaginationUseCase.execute({
+				filters: filters as Partial<UserFields> | undefined,
+				pagination: pagination as Pagination,
+				orderBy,
+				select: select as UserSelectableFields[] | undefined,
+			})
+
+		if (result.isLeft()) {
+			throw new HttpException('Erro ao buscar usuários', 500)
+		}
+
+		return {
+			users: result.value.map((user) => UserViewModel.toHTTP(user)),
+		}
 	}
 }

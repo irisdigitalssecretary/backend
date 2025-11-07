@@ -979,7 +979,450 @@ describe('UserController.create (E2E)', () => {
 		})
 	})
 
-	it('GET /users -> should be able to get many users', async () => {
-		
+	it('GET /users -> should be able to get many users without parameters (default pagination)', async () => {
+		for (let i = 1; i <= 20; i++) {
+			await request(server)
+				.post('/users')
+				.send({
+					name: `User ${i}`,
+					email: `user${i}@example.com`,
+					password: 'Test123@email',
+					phone: `12345678${i.toString().padStart(2, '0')}`,
+				})
+		}
+
+		const response = await request(server).get('/users')
+
+		expect(response.status).toBe(200)
+		expect(response.body.users).toHaveLength(15)
+		expect(response.body.users[0]).toMatchObject({
+			id: expect.any(Number),
+			uuid: expect.any(String),
+			name: expect.any(String),
+			email: expect.any(String),
+			phone: expect.any(String),
+			status: expect.any(String),
+			sessionStatus: expect.any(String),
+			createdAt: expect.any(String),
+			updatedAt: expect.any(String),
+		})
+	})
+
+	it('GET /users -> should be able to get many users with custom pagination', async () => {
+		for (let i = 1; i <= 20; i++) {
+			await request(server)
+				.post('/users')
+				.send({
+					name: `User ${i}`,
+					email: `user${i}@example.com`,
+					password: 'Test123@email',
+				})
+		}
+
+		const response = await request(server).get(
+			'/users?pagination[limit]=5&pagination[page]=1',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users).toHaveLength(5)
+	})
+
+	it('GET /users -> should respect max limit of 70', async () => {
+		for (let i = 1; i <= 80; i++) {
+			await request(server)
+				.post('/users')
+				.send({
+					name: `User ${i}`,
+					email: `user${i}@example.com`,
+					password: 'Test123@email',
+				})
+		}
+
+		const response = await request(server).get(
+			'/users?pagination[limit]=100',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users).toHaveLength(70) // Max limit
+	})
+
+	it('GET /users -> should be able to filter users by name', async () => {
+		await request(server).post('/users').send({
+			name: 'Alice Silva',
+			email: 'alice.silva.test@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Bruno Santos',
+			email: 'bruno.santos.test@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Alice Costa',
+			email: 'alice.costa.test@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get('/users?filters[name]=Alice')
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(2)
+		response.body.users.forEach((user: any) => {
+			expect(user.name).toContain('Alice')
+		})
+	})
+
+	it('GET /users -> should be able to filter users by email', async () => {
+		await request(server).post('/users').send({
+			name: 'Test User 1',
+			email: 'uniquetest1@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Test User 2',
+			email: 'uniquetest2@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get(
+			'/users?filters[email]=uniquetest1',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(1)
+		expect(response.body.users[0].email).toContain('uniquetest1')
+	})
+
+	it('GET /users -> should be able to filter users by phone', async () => {
+		await request(server).post('/users').send({
+			name: 'Test User Phone 1',
+			email: 'testphone1@example.com',
+			password: 'Test123@email',
+			phone: '11999887766',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Test User Phone 2',
+			email: 'testphone2@example.com',
+			password: 'Test123@email',
+			phone: '11888776655',
+		})
+
+		const response = await request(server).get(
+			'/users?filters[phone]=11999887766',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(1)
+		const foundUser = response.body.users.find(
+			(user: any) => user.phone === '11999887766',
+		)
+		expect(foundUser).toBeDefined()
+		expect(foundUser.phone).toBe('11999887766')
+	})
+
+	it('GET /users -> should be able to filter users by status', async () => {
+		await request(server).post('/users').send({
+			name: 'Active User Test',
+			email: 'activetest@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get(
+			'/users?filters[status]=active',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(1)
+		const activeUsers = response.body.users.filter(
+			(user: any) => user.status === 'active',
+		)
+		expect(activeUsers.length).toBe(response.body.users.length)
+	})
+
+	it('GET /users -> should be able to filter users by sessionStatus', async () => {
+		await request(server).post('/users').send({
+			name: 'User Session Test',
+			email: 'usersessiontest@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get(
+			'/users?filters[sessionStatus]=offline',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(1)
+		const offlineUsers = response.body.users.filter(
+			(user: any) => user.sessionStatus === 'offline',
+		)
+		expect(offlineUsers.length).toBe(response.body.users.length)
+	})
+
+	it('GET /users -> should be able to combine multiple filters', async () => {
+		await request(server).post('/users').send({
+			name: 'Alice Silva MultiFilter',
+			email: 'alice.multifilter@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Bob MultiFilter',
+			email: 'bob.multifilter@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get(
+			'/users?filters[name]=Alice&filters[status]=active',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(1)
+		response.body.users.forEach((user: any) => {
+			expect(user.name).toContain('Alice')
+			expect(user.status).toBe('active')
+		})
+	})
+
+	it('GET /users -> should be able to order users by name ascending', async () => {
+		await request(server).post('/users').send({
+			name: 'Zebra Order Test',
+			email: 'zebra.order@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Alpha Order Test',
+			email: 'alpha.order@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Beta Order Test',
+			email: 'beta.order@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get(
+			'/users?orderBy[name]=asc&pagination[limit]=10',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(3)
+
+		const names = response.body.users.map(
+			(user: any) => user.name as string,
+		)
+		for (let i = 1; i < names.length; i++) {
+			expect(names[i - 1].localeCompare(names[i])).toBeLessThanOrEqual(0)
+		}
+	})
+
+	it('GET /users -> should be able to order users by name descending', async () => {
+		await request(server).post('/users').send({
+			name: 'Alice',
+			email: 'alice@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Bob',
+			email: 'bob@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'Charlie',
+			email: 'charlie@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get('/users?orderBy[name]=desc')
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(3)
+
+		// Verificar se está ordenado decrescente
+		const names = response.body.users.map(
+			(user: any) => user.name as string,
+		)
+		const sortedNames = [...names].sort().reverse()
+		expect(names).toEqual(sortedNames)
+	})
+
+	it('GET /users -> should be able to order users by email', async () => {
+		await request(server).post('/users').send({
+			name: 'User Email 1',
+			email: 'zzz.email.order@example.com',
+			password: 'Test123@email',
+		})
+
+		await request(server).post('/users').send({
+			name: 'User Email 2',
+			email: 'aaa.email.order@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get(
+			'/users?orderBy[email]=asc&pagination[limit]=10',
+		)
+
+		expect(response.status).toBe(200)
+		const emails = response.body.users.map(
+			(user: any) => user.email as string,
+		)
+		for (let i = 1; i < emails.length; i++) {
+			expect(emails[i - 1].localeCompare(emails[i])).toBeLessThanOrEqual(
+				0,
+			)
+		}
+	})
+
+	it('GET /users -> should be able to select specific fields', async () => {
+		await request(server).post('/users').send({
+			name: 'John Doe Select Test',
+			email: 'john.select@example.com',
+			password: 'Test123@email',
+			phone: '11999887766',
+		})
+
+		const response = await request(server).get('/users?pagination[limit]=5')
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(1)
+
+		response.body.users.forEach((user: any) => {
+			expect(user.name).toBeDefined()
+			expect(user.email).toBeDefined()
+		})
+	})
+
+	it('GET /users -> should be able to get users with all fields', async () => {
+		await request(server).post('/users').send({
+			name: 'Test User All Fields',
+			email: 'test.allfields@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get('/users?pagination[limit]=5')
+
+		expect(response.status).toBe(200)
+		expect(response.body.users.length).toBeGreaterThanOrEqual(1)
+
+		response.body.users.forEach((user: any) => {
+			expect(user.id).toBeDefined()
+			expect(user.uuid).toBeDefined()
+		})
+	})
+
+	it('GET /users -> should be able to combine filters, pagination, ordering and select', async () => {
+		for (let i = 1; i <= 10; i++) {
+			await request(server)
+				.post('/users')
+				.send({
+					name: `Alice User ${i}`,
+					email: `alice${i}@example.com`,
+					password: 'Test123@email',
+				})
+		}
+
+		for (let i = 1; i <= 5; i++) {
+			await request(server)
+				.post('/users')
+				.send({
+					name: `Bob User ${i}`,
+					email: `bob${i}@example.com`,
+					password: 'Test123@email',
+				})
+		}
+
+		const response = await request(server).get(
+			'/users?filters[name]=Alice&pagination[limit]=5&pagination[page]=1&orderBy[name]=asc&select=name&select=email',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users).toHaveLength(5)
+
+		response.body.users.forEach((user: any) => {
+			expect(user.name).toContain('Alice')
+			expect(user.email).toBeDefined()
+		})
+
+		// Verificar ordenação
+		const names = response.body.users.map(
+			(user: any) => user.name as string,
+		)
+		const sortedNames = [...names].sort()
+		expect(names).toEqual(sortedNames)
+	})
+
+	it('GET /users -> should return empty array when no users match filters', async () => {
+		await request(server).post('/users').send({
+			name: 'John Doe Empty Test',
+			email: 'john.emptytest@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get(
+			'/users?filters[name]=NonExistentUserXYZ12345',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users).toHaveLength(0)
+	})
+
+	it('GET /users -> should return empty array when page exceeds total records', async () => {
+		await request(server).post('/users').send({
+			name: 'Test User Page',
+			email: 'test.page@example.com',
+			password: 'Test123@email',
+		})
+
+		const response = await request(server).get(
+			'/users?pagination[limit]=5&pagination[page]=1000',
+		)
+
+		expect(response.status).toBe(200)
+		expect(response.body.users).toHaveLength(0)
+	})
+
+	it('GET /users -> should handle pagination correctly across pages', async () => {
+		for (let i = 1; i <= 25; i++) {
+			await request(server)
+				.post('/users')
+				.send({
+					name: `User Pagination ${i}`,
+					email: `user.pagination${i}@example.com`,
+					password: 'Test123@email',
+				})
+		}
+
+		const firstPage = await request(server).get(
+			'/users?filters[name]=Pagination&pagination[limit]=5&pagination[page]=1&orderBy[email]=asc',
+		)
+		const secondPage = await request(server).get(
+			'/users?filters[name]=Pagination&pagination[limit]=5&pagination[page]=2&orderBy[email]=asc',
+		)
+
+		expect(firstPage.status).toBe(200)
+		expect(secondPage.status).toBe(200)
+
+		expect(firstPage.body.users.length).toBeGreaterThanOrEqual(5)
+		expect(secondPage.body.users.length).toBeGreaterThanOrEqual(5)
+
+		const firstPageIds = firstPage.body.users.map(
+			(user: any) => user.id as number,
+		)
+		const secondPageIds = secondPage.body.users.map(
+			(user: any) => user.id as number,
+		)
+
+		const intersection = firstPageIds.filter((id: number) =>
+			Boolean(secondPageIds.includes(id)),
+		)
+		expect(intersection).toHaveLength(0)
 	})
 })

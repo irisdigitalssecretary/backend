@@ -11,8 +11,9 @@ export class UserMapper {
 			id: user.id,
 			name: user.name,
 			email: user.email,
-			sessionStatus: SessionStatus[user.sessionStatus.toUpperCase()],
-			status: UserStatus[user.status.toUpperCase()],
+			sessionStatus:
+				SessionStatus[user.sessionStatus?.toUpperCase()] ?? undefined,
+			status: UserStatus[user.status?.toUpperCase()] ?? undefined,
 			password: user.password ?? undefined,
 			phone: user.phone ?? undefined,
 			createdAt: user.createdAt,

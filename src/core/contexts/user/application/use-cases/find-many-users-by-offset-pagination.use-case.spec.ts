@@ -5,7 +5,7 @@ import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-rep
 import { UserEntity } from '../../domain/entities/user.entity'
 import { UserFactory } from '../../factories/make-user-entity'
 import { FindManyUsersByOffsetPaginationUseCase } from './find-many-users-by-offset-pagination.use-case'
-import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
+import { OffsetPagination } from '@/core/shared/domain/value-objects/offset-pagination'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 
@@ -348,6 +348,148 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			expect(result.isRight()).toBe(true)
 			const users = result.value as UserEntity[]
 			expect(users).toHaveLength(5)
+		})
+	})
+
+	describe('Select Fields', () => {
+		it('should be able to select specific fields', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['name', 'email'],
+				},
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.name).toBeDefined()
+				expect(user.email).toBeDefined()
+			})
+		})
+
+		it('should be able to select only name field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['name'],
+				},
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.name).toBeDefined()
+			})
+		})
+
+		it('should be able to select only email field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['email'],
+				},
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.email).toBeDefined()
+			})
+		})
+
+		it('should be able to combine select with filters', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: { status: UserStatus.ACTIVE },
+					select: ['name', 'email', 'status'],
+				},
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(3)
+
+			users.forEach((user) => {
+				expect(user.name).toBeDefined()
+				expect(user.email).toBeDefined()
+				expect(user.status).toBe(UserStatus.ACTIVE)
+			})
+		})
+
+		it('should be able to combine select with pagination', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					pagination: OffsetPagination.create(2, 1),
+					select: ['name', 'email'],
+				},
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(2)
+
+			users.forEach((user) => {
+				expect(user.name).toBeDefined()
+				expect(user.email).toBeDefined()
+			})
+		})
+
+		it('should be able to combine select with ordering', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { name: 'asc' },
+					select: ['name', 'email'],
+				},
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.name).toBeDefined()
+				expect(user.email).toBeDefined()
+			})
+
+			for (let i = 1; i < users.length; i++) {
+				expect(
+					users[i - 1].name.localeCompare(users[i].name),
+				).toBeLessThanOrEqual(0)
+			}
+		})
+
+		it('should be able to combine select with filters, pagination and ordering', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: { status: UserStatus.ACTIVE },
+					orderBy: { name: 'asc' },
+					pagination: OffsetPagination.create(2, 1),
+					select: ['name', 'email', 'status'],
+				},
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(2)
+
+			users.forEach((user) => {
+				expect(user.name).toBeDefined()
+				expect(user.email).toBeDefined()
+				expect(user.status).toBe(UserStatus.ACTIVE)
+			})
+
+			expect(
+				users[0].name.localeCompare(users[1].name),
+			).toBeLessThanOrEqual(0)
 		})
 	})
 })

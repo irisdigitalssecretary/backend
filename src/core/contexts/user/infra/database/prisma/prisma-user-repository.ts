@@ -1,15 +1,17 @@
 import {
-	UserFilters,
+	UserFields,
 	UserRepository,
+	UserSelectableFields,
 } from '../../../domain/repositories/user-repository'
 import { UserEntity } from '../../../domain/entities/user.entity'
 import { UserMapper } from '../mappers/user.mapper'
-import { FindManyOptions } from '@shared/domain/utils/find-many'
-import { OffsetPagination } from '@shared/domain/utils/offset-pagination'
+import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
+import { OffsetPagination } from '@/core/shared/domain/value-objects/offset-pagination'
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { Prisma } from 'generated/prisma'
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
@@ -75,15 +77,43 @@ export class PrismaUserRepository implements UserRepository {
 	}
 
 	async findManyByOffsetPagination(
-		props: FindManyOptions<UserFilters, OffsetPagination>,
+		props: FindManyOptions<
+			Partial<UserFields>,
+			OffsetPagination,
+			UserSelectableFields
+		>,
 	): Promise<UserEntity[]> {
 		const prisma = this.prisma
+		const { filters } = props
+		const whereClause: Prisma.UserWhereInput = {}
+
+		if (filters?.name) {
+			whereClause.name = {
+				contains: filters.name,
+				mode: 'insensitive',
+			}
+		}
+
+		if (filters?.email) {
+			whereClause.email = {
+				contains: filters.email,
+				mode: 'insensitive',
+			}
+		}
+
+		if (filters?.phone) {
+			whereClause.phone = {
+				contains: filters.phone,
+				mode: 'insensitive',
+			}
+		}
 
 		const users = await prisma.user.findMany({
-			where: props.filters,
-			skip: props.pagination?.offset,
+			where: whereClause,
+			skip: props.pagination?.after,
 			take: props.pagination?.limit,
 			orderBy: props.orderBy,
+			select: PrismaService.buildSelectObject(props.select),
 		})
 
 		const domainUsers: UserEntity[] = await Promise.all(

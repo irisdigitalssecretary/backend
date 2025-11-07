@@ -1,9 +1,9 @@
 {
-  "explorer.compactFolders": false,
-  "workbench.tree.indent": 12,
-  "workbench.tree.renderIndentGuides": "always",
-  "files.eol": "\n",
-  "[prisma]": {
-  	"editor.formatOnSave": true,
-  }
+	"explorer.compactFolders": false,
+	"workbench.tree.indent": 12,
+	"workbench.tree.renderIndentGuides": "always",
+	"files.eol": "\n",
+	"[prisma]": {
+		"editor.formatOnSave": true
+	}
 }

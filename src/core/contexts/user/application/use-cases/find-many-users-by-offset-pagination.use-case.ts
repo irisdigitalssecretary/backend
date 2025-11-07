@@ -1,16 +1,19 @@
 import {
-	UserFilters,
+	UserFields,
 	UserRepository,
+	UserSelectableFields,
 } from '../../domain/repositories/user-repository'
 import { UserEntity } from '../../domain/entities/user.entity'
 import { Either, right } from '@/core/shared/domain/base/either'
-import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
-import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
+import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
+import { OffsetPagination } from '@/core/shared/domain/value-objects/offset-pagination'
 import { Injectable } from '@nestjs/common'
+import { Pagination } from '@/core/shared/application/utils/pagination'
 
 type FindManyUsersByOffsetPaginationUseCaseRequest = FindManyOptions<
-	UserFilters,
-	OffsetPagination
+	Partial<UserFields>,
+	Pagination,
+	UserSelectableFields
 >
 
 type FindManyUsersByOffsetPaginationUseCaseResponse = Either<null, UserEntity[]>
@@ -30,6 +33,7 @@ export class FindManyUsersByOffsetPaginationUseCase {
 					props?.pagination?.page,
 				),
 				orderBy: props.orderBy,
+				select: props.select,
 			}),
 		)
 	}

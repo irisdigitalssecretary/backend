@@ -1,10 +1,11 @@
-import { OffsetPagination } from '@/core/shared/domain/utils/offset-pagination'
+import { OffsetPagination } from '@/core/shared/domain/value-objects/offset-pagination'
 import { UserEntity } from '../../domain/entities/user.entity'
 import {
-	UserFilters,
+	UserFields,
 	UserRepository,
+	UserSelectableFields,
 } from '../../domain/repositories/user-repository'
-import { FindManyOptions } from '@/core/shared/domain/utils/find-many'
+import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 
@@ -80,10 +81,14 @@ export class InMemoryUserRepository implements UserRepository {
 	}
 
 	public findManyByOffsetPagination(
-		props: FindManyOptions<UserFilters, OffsetPagination>,
+		props: FindManyOptions<
+			Partial<UserFields>,
+			OffsetPagination,
+			UserSelectableFields
+		>,
 	): Promise<UserEntity[]> {
 		return new Promise((resolve) => {
-			const { filters } = props
+			const { filters, select, orderBy } = props
 
 			let users = this.users.filter((user) => {
 				let condition = true
@@ -125,7 +130,7 @@ export class InMemoryUserRepository implements UserRepository {
 				return condition
 			})
 
-			const orderByEntries = Object.entries(props.orderBy || {})
+			const orderByEntries = Object.entries(orderBy || {})
 			users = users.sort((a, b) => {
 				for (const [field, direction] of orderByEntries) {
 					let compareResult = 0
@@ -158,10 +163,30 @@ export class InMemoryUserRepository implements UserRepository {
 			})
 
 			users = users.slice(
-				props.pagination?.offset,
-				(props.pagination?.offset || 0) +
-					(props.pagination?.limit || 10),
+				props.pagination?.after,
+				(props.pagination?.after || 0) +
+					(props.pagination?.limit || 15),
 			)
+
+			if (select && select.length > 0) {
+				users = users.map((user) => {
+					const selectedFields: any = {}
+					select.forEach((field) => {
+						if (field in user || field in user.props) {
+							selectedFields[field] =
+								user[field] || user.props[field]
+						}
+					})
+
+					return UserEntity.create(
+						{
+							...selectedFields,
+							email: user.props.email,
+						},
+						user.id,
+					)
+				})
+			}
 
 			resolve(users)
 		})
