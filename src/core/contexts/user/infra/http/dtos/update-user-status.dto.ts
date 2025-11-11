@@ -2,9 +2,11 @@ import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum
 import { z } from 'zod'
 
 export const updateUserStatusSchema = z.object({
-	status: z.enum(UserStatus, {
-		message: 'Status inválido.',
-	}),
+	status: z
+		.enum(UserStatus, {
+			message: 'Status inválido.',
+		})
+		.transform((value) => value.trim()),
 })
 
 export type UpdateUserStatusBody = z.infer<typeof updateUserStatusSchema>

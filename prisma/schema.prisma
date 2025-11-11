@@ -7,17 +7,67 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// Controle de seeds
+model SeedHistory {
+    id        Int      @id @default(autoincrement())
+    filename  String   @unique
+    createdAt DateTime @default(now())
+}
+
+model Country {
+    id        Int      @id @default(autoincrement())
+    name      String   @db.VarChar(100)
+    iso2      String   @unique @db.VarChar(2) // "BR"
+    iso3      String   @unique @db.VarChar(3) // "BRA"
+    phoneCode String?  @db.VarChar(10) // "+55"
+    createdAt DateTime @default(now())
+
+    companies Company[]
+}
+
 model User {
     id            Int           @id @default(autoincrement())
     uuid          String        @unique @default(uuid())
     name          String        @db.VarChar(150)
     email         String        @db.VarChar(100)
-    password      String?
+    password      String
     sessionStatus SessionStatus @default(offline)
     status        UserStatus    @default(active)
     phone         String?       @db.VarChar(16)
     createdAt     DateTime      @default(now())
     updatedAt     DateTime      @updatedAt
+    companyId     Int
+
+    company Company @relation(fields: [companyId], references: [id])
+}
+
+model Company {
+    id           Int        @id @default(autoincrement())
+    uuid         String     @unique @default(uuid())
+    name         String     @db.VarChar(150)
+    email        String     @db.VarChar(100)
+    landline     String?    @db.VarChar(16)
+    phone        String?    @db.VarChar(16)
+    address      String     @db.VarChar(255)
+    city         String     @db.VarChar(100)
+    state        String     @db.VarChar(100)
+    zip          String?    @db.VarChar(10)
+    countryId    Int
+    taxId        String     @db.VarChar(50)
+    description  String?    @db.VarChar(255)
+    businessArea String     @db.VarChar(70)
+    personType   PersonType @default(individual)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    users   User[]
+    country Country? @relation(fields: [countryId], references: [id])
+}
+
+enum PersonType {
+    individual
+    company
 }
 
 enum SessionStatus {

@@ -2,9 +2,11 @@ import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-
 import { z } from 'zod'
 
 export const updateUserSessionStatusSchema = z.object({
-	status: z.enum(SessionStatus, {
-		message: 'Status inválido.',
-	}),
+	status: z
+		.enum(SessionStatus, {
+			message: 'Status inválido.',
+		})
+		.transform((value) => value.trim()),
 })
 
 export type UpdateUserSessionStatusBody = z.infer<

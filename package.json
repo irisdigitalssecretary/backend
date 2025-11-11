@@ -16,8 +16,15 @@
 		"e2e": "dotenv -e .env.test -- vitest --config ./vitest.config.e2e.ts",
 		"unit": "vitest --config ./vitest.config.unit.ts",
 		"test:watch": "vitest --watch",
-		"migrate:dev": "npx prisma migrate dev",
+		"migrate:prod": "npx prisma migrate deploy",
+		"seed:prod": "node dist/prisma/upSeeds.js",
+		"seed:prod:down": "seed:prod -- --down",
+		"migrate:dev": "npx prisma migrate dev && tsx prisma/seed.ts",
+		"seed:dev": "tsx prisma/seed.ts",
+		"seed:dev:down": "seed:dev -- --down",
 		"migrate:test": "dotenv -e .env.test -- npx prisma migrate dev",
+		"seed:test": "dotenv -e .env.test -- tsx prisma/seed.ts",
+		"seed:test:down": "seed:test -- --down",
 		"coverage": "vitest run --coverage"
 	},
 	"dependencies": {
