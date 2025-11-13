@@ -1,7 +1,7 @@
 import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.service'
 import { Password } from './password'
 import { InvalidPasswordError } from '../errors/invalid-password-error'
-import { Hasher } from '../infra/services/hasher'
+import { Hasher } from '../infra/services/crypt/hasher'
 
 describe('Password test', () => {
 	let hasher: Hasher

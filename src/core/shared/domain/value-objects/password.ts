@@ -1,5 +1,5 @@
 import { ValueObject } from '@shared/domain/base/value-object'
-import { Hasher } from '@shared/domain/infra/services/hasher'
+import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { InvalidPasswordError } from '../errors/invalid-password-error'
 
 interface PasswordProps {

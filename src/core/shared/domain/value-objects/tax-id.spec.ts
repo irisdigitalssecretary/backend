@@ -1,6 +1,6 @@
 import { ValueObject } from '@/core/shared/domain/base/value-object'
-import { TaxIdRequiredError } from '../errors/tax-id-required'
-import { TooShortTaxIdError } from '../errors/too-shor-tax-id'
+import { TaxIdInvalidError } from '@/core/shared/domain/errors/tax-id-invalid-error'
+import { TaxIdRequiredError } from '@/core/shared/domain/errors/tax-id-required-error'
 
 export class TaxId extends ValueObject<{ value: string }> {
 	constructor(value: string) {
@@ -19,7 +19,7 @@ export class TaxId extends ValueObject<{ value: string }> {
 		}
 
 		if (value.length < 5) {
-			throw new TooShortTaxIdError()
+			throw new TaxIdInvalidError()
 		}
 	}
 }

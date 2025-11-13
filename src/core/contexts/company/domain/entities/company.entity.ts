@@ -5,7 +5,8 @@ import { Landline } from '@/core/shared/domain/value-objects/landline'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
 import { UniqueEntityId } from '@/core/shared/domain/value-objects/unique-entity-id'
 import { CompanyDescription } from '../value-objects/company-description'
-import { TaxId } from '../value-objects/tax-id'
+import { TaxId } from '@/core/shared/domain/value-objects/tax-id'
+import { ZipCode } from '@/core/shared/domain/value-objects/zip-code'
 
 export interface CompanyEntityProps {
 	id?: number
@@ -17,7 +18,7 @@ export interface CompanyEntityProps {
 	address: string
 	city: string
 	state: string
-	zip?: string
+	zip?: ZipCode
 	countryId: number
 	taxId: TaxId
 	description?: CompanyDescription

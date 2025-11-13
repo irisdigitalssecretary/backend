@@ -2,7 +2,9 @@ interface ValueObjectProps {
 	[key: string]: any
 }
 
-export abstract class ValueObject<T extends ValueObjectProps> {
+export abstract class ValueObject<
+	T extends ValueObjectProps = { value: string },
+> {
 	public readonly props: T
 
 	constructor(props: T) {

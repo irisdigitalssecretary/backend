@@ -1,7 +1,7 @@
 import { Email } from '@shared/domain/value-objects/email'
 import { UserEntity } from '../domain/entities/user.entity'
 import { Password } from '@/core/shared/domain/value-objects/password'
-import { Hasher } from '@shared/domain/infra/services/hasher'
+import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'

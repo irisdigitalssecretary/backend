@@ -1,5 +1,5 @@
 import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.service'
-import { Hasher } from '@shared/domain/infra/services/hasher'
+import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'

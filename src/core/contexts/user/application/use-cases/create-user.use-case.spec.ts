@@ -1,6 +1,6 @@
 import { BcryptHasher } from '@/core/shared/infra/services/crypt/bcrypt-hasher.service'
 import { CreateUserUseCase } from './create-user.use-case'
-import { Hasher } from '@shared/domain/infra/services/hasher'
+import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserEntity } from '../../domain/entities/user.entity'

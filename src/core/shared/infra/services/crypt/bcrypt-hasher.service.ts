@@ -1,4 +1,4 @@
-import { Hasher as IHasher } from '@shared/domain/infra/services/hasher'
+import { Hasher as IHasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import bcrypt from 'bcrypt'
 import { Injectable } from '@nestjs/common'
 
