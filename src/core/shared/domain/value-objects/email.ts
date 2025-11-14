@@ -13,6 +13,10 @@ export class Email extends ValueObject<{ value: string }> {
 		return this.props.value
 	}
 
+	public static restore(email: string): Email {
+		return new Email(email)
+	}
+
 	public static create(email: string): Email {
 		this.validate(email)
 

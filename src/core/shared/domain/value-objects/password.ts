@@ -15,7 +15,7 @@ export class Password extends ValueObject<PasswordProps> {
 		return this.props.hashedPassword
 	}
 
-	public static fromHash(password: string): Password {
+	public static restore(password: string): Password {
 		return new Password(password)
 	}
 

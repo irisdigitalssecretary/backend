@@ -10,7 +10,7 @@ export class Landline extends ValueObject<{ value: string }> {
 		return this.props.value
 	}
 
-	public static fromString(landline: string): Landline {
+	public static restore(landline: string): Landline {
 		return new Landline(landline)
 	}
 

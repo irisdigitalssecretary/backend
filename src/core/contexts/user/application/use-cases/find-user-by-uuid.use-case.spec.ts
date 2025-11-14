@@ -4,7 +4,7 @@ import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserEntity } from '../../domain/entities/user.entity'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
-import { UserFactory } from '../../factories/make-user-entity'
+import { UserFactory } from '../../domain/factories/make-user-entity'
 import { FindUserByUuidUseCase } from './find-user-by-uuid.use-case'
 
 describe('FindUserByUuidUseCase', () => {

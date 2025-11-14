@@ -1,5 +1,5 @@
 import { Email } from '@shared/domain/value-objects/email'
-import { UserEntity } from '../domain/entities/user.entity'
+import { UserEntity } from '../entities/user.entity'
 import { Password } from '@/core/shared/domain/value-objects/password'
 import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
@@ -39,15 +39,15 @@ export class UserFactory {
 	}
 
 	static reconstitute(props: MakeUserEntityProps) {
-		const phone = props.phone ? Phone.fromString(props.phone) : undefined
+		const phone = props.phone ? Phone.restore(props.phone) : undefined
 		const password = props.password
-			? Password.fromHash(props.password)
+			? Password.restore(props.password)
 			: undefined
 
 		return UserEntity.restore({
 			...props,
 			uuid: props.uuid,
-			email: Email.create(props.email),
+			email: Email.restore(props.email),
 			phone,
 			password,
 			createdAt: props.createdAt || new Date(),

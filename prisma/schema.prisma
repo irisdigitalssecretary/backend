@@ -13,6 +13,7 @@ model Country {
     iso2      String   @unique @db.VarChar(2) // "BR"
     iso3      String   @unique @db.VarChar(3) // "BRA"
     phoneCode String?  @db.VarChar(10) // "+55"
+    locale    String?  @db.VarChar(10) // "pt-BR"
     createdAt DateTime @default(now())
 
     companies Company[]
@@ -35,24 +36,24 @@ model User {
 }
 
 model Company {
-    id           Int        @id @default(autoincrement())
-    uuid         String     @unique @default(uuid())
-    name         String     @db.VarChar(150)
-    email        String     @db.VarChar(100)
-    landline     String?    @db.VarChar(16)
-    phone        String?    @db.VarChar(16)
-    address      String     @db.VarChar(255)
-    city         String     @db.VarChar(100)
-    state        String     @db.VarChar(100)
-    zip          String?    @db.VarChar(10)
+    id           Int           @id @default(autoincrement())
+    uuid         String        @unique @default(uuid())
+    name         String        @db.VarChar(150)
+    email        String        @db.VarChar(100)
+    landline     String?       @db.VarChar(16)
+    phone        String?       @db.VarChar(16)
+    address      String        @db.VarChar(255)
+    city         String        @db.VarChar(100)
+    state        String        @db.VarChar(100)
+    zip          String?       @db.VarChar(10)
     countryId    Int
-    taxId        String     @db.VarChar(50)
-    description  String?    @db.VarChar(255)
-    businessArea String     @db.VarChar(70)
-    personType   PersonType @default(individual)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    taxId        String        @db.VarChar(50)
+    description  String?       @db.VarChar(255)
+    businessArea String        @db.VarChar(70)
+    personType   PersonType    @default(individual)
+    status       CompanyStatus @default(onboarding)
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
 
     users   User[]
     country Country? @relation(fields: [countryId], references: [id])
@@ -61,6 +62,13 @@ model Company {
 enum PersonType {
     individual
     company
+}
+
+enum CompanyStatus {
+    active
+    inactive
+    blocked
+    onboarding
 }
 
 enum SessionStatus {

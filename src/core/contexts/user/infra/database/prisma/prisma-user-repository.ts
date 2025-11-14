@@ -11,7 +11,7 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
-import { Prisma } from 'generated/prisma'
+import { Prisma } from '@prisma/client'
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {

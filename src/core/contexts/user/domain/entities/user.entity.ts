@@ -34,11 +34,11 @@ export class UserEntity extends Entity<UserEntityProps> {
 	}
 
 	public get sessionStatus(): SessionStatus | undefined {
-		return this.props.sessionStatus || undefined
+		return this.props.sessionStatus
 	}
 
 	public get status(): UserStatus | undefined {
-		return this.props.status || undefined
+		return this.props.status
 	}
 
 	public get name() {
@@ -87,14 +87,6 @@ export class UserEntity extends Entity<UserEntityProps> {
 
 	public get updatedAt(): Date {
 		return this.props.updatedAt || new Date()
-	}
-
-	public get props() {
-		return this._props || {}
-	}
-
-	public set props(props: UserEntityProps) {
-		this._props = props
 	}
 
 	public async updatePassword({

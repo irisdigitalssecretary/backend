@@ -3,7 +3,7 @@ import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { UserRepository } from '../../domain/repositories/user-repository'
 import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user-repository'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
-import { UserFactory } from '../../factories/make-user-entity'
+import { UserFactory } from '../../domain/factories/make-user-entity'
 import { UpdateUserStatusUseCase } from './update-user-status.use-case'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 

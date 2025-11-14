@@ -17,6 +17,10 @@ export class ZipCode extends ValueObject {
 		return this.props.value
 	}
 
+	public static restore(value: string): ZipCode {
+		return new ZipCode(value)
+	}
+
 	public static create(
 		props: CreateZipCodeProps,
 		zipCodeValidator: ZipCodeValidator,

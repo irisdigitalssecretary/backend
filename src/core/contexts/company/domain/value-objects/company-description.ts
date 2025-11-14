@@ -7,6 +7,14 @@ export class CompanyDescription extends ValueObject<{ value: string }> {
 		super({ value })
 	}
 
+	public get value(): string {
+		return this.props.value
+	}
+
+	public static restore(value: string): CompanyDescription {
+		return new CompanyDescription(value)
+	}
+
 	public static create(value: string): CompanyDescription {
 		this.validate(value)
 

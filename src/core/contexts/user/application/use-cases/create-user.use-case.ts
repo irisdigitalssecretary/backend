@@ -5,7 +5,7 @@ import { UserEmailExistsError } from './errors/user-email-already-exists'
 import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password-error'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
-import { UserFactory } from '../../factories/make-user-entity'
+import { UserFactory } from '../../domain/factories/make-user-entity'
 import { Injectable } from '@nestjs/common'
 import { DomainError } from '@/core/shared/domain/base/domain-error'
 
