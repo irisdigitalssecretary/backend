@@ -6,7 +6,7 @@ export const updateUserStatusSchema = z.object({
 		.enum(UserStatus, {
 			message: 'Status inválido.',
 		})
-		.transform((value) => value.trim()),
+		.transform((value) => value.trim() as UserStatus),
 })
 
 export type UpdateUserStatusBody = z.infer<typeof updateUserStatusSchema>

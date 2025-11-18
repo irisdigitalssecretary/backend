@@ -22,7 +22,7 @@ export class CompanyAdress extends ValueObject<{ value: string }> {
 	}
 
 	private static validate(value: string): void {
-		if (value.length < 20) {
+		if (value.length < 10) {
 			throw new TooShortCompanyAdressError()
 		}
 		if (value.length > 255) {

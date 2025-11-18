@@ -8,12 +8,12 @@ export const updateUserSchema = z.object({
 		.enum(SessionStatus, {
 			message: 'Status de sessão inválido.',
 		})
-		.transform((value) => value.trim()),
+		.transform((value) => value.trim() as SessionStatus),
 	status: z
 		.enum(UserStatus, {
 			message: 'Status inválido.',
 		})
-		.transform((value) => value.trim()),
+		.transform((value) => value.trim() as UserStatus),
 	email: z
 		.email('E-mail inválido.')
 		.max(100, 'E-mail deve possuir no máximo 100 caracteres.')

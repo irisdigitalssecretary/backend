@@ -10,6 +10,7 @@ import { CompanyEntity } from '../entities/company.entity'
 import { CompanyDescription } from '../value-objects/company-description'
 import { CompanyAdress } from '../value-objects/company-adress'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
+import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
 
 interface MakeCompanyEntityProps {
 	id?: number
@@ -79,7 +80,7 @@ export class CompanyFactory {
 			countryId: props.countryId,
 			taxId,
 			description,
-			businessArea: props.businessArea,
+			businessArea: CompanyBusinessArea[props.businessArea.toUpperCase()],
 		})
 	}
 
@@ -99,6 +100,7 @@ export class CompanyFactory {
 				: undefined,
 			personType,
 			address: CompanyAdress.restore(props.address),
+			businessArea: CompanyBusinessArea[props.businessArea.toUpperCase()],
 		})
 	}
 }

@@ -6,7 +6,7 @@ export const updateUserSessionStatusSchema = z.object({
 		.enum(SessionStatus, {
 			message: 'Status inválido.',
 		})
-		.transform((value) => value.trim()),
+		.transform((value) => value.trim() as SessionStatus),
 })
 
 export type UpdateUserSessionStatusBody = z.infer<

@@ -4,7 +4,7 @@ import {
 	UserFields,
 	UserRepository,
 	UserSelectableFields,
-} from '../../domain/repositories/user-repository'
+} from '../../domain/repositories/user.repository'
 import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'

@@ -2,7 +2,7 @@ import {
 	UserFields,
 	UserRepository,
 	UserSelectableFields,
-} from '../../domain/repositories/user-repository'
+} from '../../domain/repositories/user.repository'
 import { UserEntity } from '../../domain/entities/user.entity'
 import { Either, right } from '@/core/shared/domain/base/either'
 import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'

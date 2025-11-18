@@ -1,7 +1,6 @@
-import { UserRepository } from '../../domain/repositories/user-repository'
 import { UserEntity } from '../../domain/entities/user.entity'
 import { Either, left, right } from '@shared/domain/base/either'
-import { UserEmailExistsError } from './errors/user-email-already-exists'
+import { UserEmailExistsError } from '../errors/user-email-already-exists'
 import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { InvalidPasswordError } from '../../../../shared/domain/errors/invalid-password-error'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
@@ -14,6 +13,7 @@ import { Phone } from '@/core/shared/domain/value-objects/phone'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { Injectable } from '@nestjs/common'
+import { UserRepository } from '../../domain/repositories/user.repository'
 
 interface UpdateUserUseCaseRequest {
 	name: string

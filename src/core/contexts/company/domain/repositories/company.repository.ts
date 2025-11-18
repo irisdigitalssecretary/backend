@@ -31,6 +31,10 @@ export abstract class CompanyRepository {
 	abstract create(company: CompanyEntity): Promise<CompanyEntity>
 	abstract findByEmail(email: string): Promise<CompanyEntity | null>
 	abstract findByTaxId(taxId: string): Promise<CompanyEntity | null>
+	abstract findByEmailOrTaxId(
+		email: string,
+		taxId: string,
+	): Promise<CompanyEntity | null>
 	abstract findById(id: number): Promise<CompanyEntity | null>
 	abstract findByUuid(uuid: string): Promise<CompanyEntity | null>
 	abstract update(company: CompanyEntity): Promise<CompanyEntity>

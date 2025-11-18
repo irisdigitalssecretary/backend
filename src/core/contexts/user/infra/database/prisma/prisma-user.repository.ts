@@ -2,7 +2,7 @@ import {
 	UserFields,
 	UserRepository,
 	UserSelectableFields,
-} from '../../../domain/repositories/user-repository'
+} from '../../../domain/repositories/user.repository'
 import { UserEntity } from '../../../domain/entities/user.entity'
 import { UserMapper } from '../mappers/user.mapper'
 import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
@@ -113,7 +113,9 @@ export class PrismaUserRepository implements UserRepository {
 			skip: props.pagination?.after,
 			take: props.pagination?.limit,
 			orderBy: props.orderBy,
-			select: PrismaService.buildSelectObject(props.select),
+			select: this.prisma.buildSelectObject<UserSelectableFields>(
+				props.select,
+			),
 		})
 
 		const domainUsers: UserEntity[] = await Promise.all(

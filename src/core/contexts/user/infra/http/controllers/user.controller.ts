@@ -37,7 +37,7 @@ import {
 import {
 	UserFields,
 	UserSelectableFields,
-} from '../../../domain/repositories/user-repository'
+} from '../../../domain/repositories/user.repository'
 import { Pagination } from '@/core/shared/application/utils/pagination'
 
 @Controller('users')
@@ -196,7 +196,7 @@ export class UserController {
 
 		const result =
 			await this.findManyUsersByOffsetPaginationUseCase.execute({
-				filters: filters as Partial<UserFields> | undefined,
+				filters: filters as UserFields,
 				pagination: pagination as Pagination,
 				orderBy,
 				select: select as UserSelectableFields[] | undefined,

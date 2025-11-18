@@ -9,6 +9,7 @@ import { TaxId } from '@/core/shared/domain/value-objects/tax-id'
 import { ZipCode } from '@/core/shared/domain/value-objects/zip-code'
 import { CompanyAdress } from '../value-objects/company-adress'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
+import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
 
 export interface CompanyEntityProps {
 	id?: number
@@ -24,7 +25,7 @@ export interface CompanyEntityProps {
 	countryId: number
 	taxId: TaxId
 	description?: CompanyDescription
-	businessArea: string
+	businessArea: CompanyBusinessArea
 	personType?: PersonType
 	status?: CompanyStatus
 	createdAt?: Date

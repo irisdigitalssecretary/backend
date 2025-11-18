@@ -2,7 +2,7 @@ import {
 	CompanyFields,
 	CompanyRepository,
 	CompanySelectableFields,
-} from '../../../domain/repositories/company-repository'
+} from '../../../domain/repositories/company.repository'
 import { CompanyEntity } from '../../../domain/entities/company.entity'
 import { CompanyMapper } from '../mappers/company.mapper'
 import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
@@ -45,6 +45,17 @@ export class PrismaCompanyRepository implements CompanyRepository {
 		const company = await this.prisma.company.findFirst({
 			where: { email },
 		})
+		return company ? CompanyMapper.toDomain(company) : null
+	}
+
+	async findByEmailOrTaxId(
+		email: string,
+		taxId: string,
+	): Promise<CompanyEntity | null> {
+		const company = await this.prisma.company.findFirst({
+			where: { OR: [{ email }, { taxId }] },
+		})
+
 		return company ? CompanyMapper.toDomain(company) : null
 	}
 
@@ -153,7 +164,9 @@ export class PrismaCompanyRepository implements CompanyRepository {
 			skip: props.pagination?.after,
 			take: props.pagination?.limit,
 			orderBy: props.orderBy,
-			select: PrismaService.buildSelectObject(props.select),
+			select: this.prisma.buildSelectObject<CompanySelectableFields>(
+				props.select,
+			),
 		})
 
 		const domainCompanies: CompanyEntity[] = await Promise.all(

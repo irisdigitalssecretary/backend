@@ -20,7 +20,7 @@ export class PrismaService extends PrismaClient {
 		return PrismaService.MODELS_WITH_COMPANY.includes(model)
 	}
 
-	public static buildSelectObject<T extends string>(
+	public buildSelectObject<T extends string>(
 		fields?: T[],
 	): Record<T, boolean> | undefined {
 		if (!fields || fields.length === 0) {
