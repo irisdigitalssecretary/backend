@@ -20,6 +20,7 @@ import { TooLongCompanyAdressError } from '../../domain/errors/too-long-company-
 import { TooShortCompanyDescriptionError } from '../../domain/errors/too-short-company-description'
 import { TooLongCompanyDescriptionError } from '../../domain/errors/too-long-company-description'
 import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
+import { LandlineOrPhoneIsRequiredError } from '../../domain/errors/landline-or-phone-is-required'
 
 describe('CreateCompanyUseCase', () => {
 	let companyRepository: InMemoryCompanyRepository
@@ -380,6 +381,31 @@ describe('CreateCompanyUseCase', () => {
 		expect(result.value).toMatchObject({
 			message:
 				'A descrição da empresa deve possuir no máximo 255 caracteres.',
+			statusCode: 400,
+		})
+		expect(companyRepository.companies.length).toBe(0)
+	})
+
+	it('should not be able to create a company if the landline and phone are not provided', async () => {
+		const result = await createCompanyUseCase.execute({
+			name: 'Company 1',
+			email: 'company1@example.com',
+			taxId: '01894147000135',
+			address: '123 Main St',
+			city: 'Anytown',
+			state: 'Rio de Janeiro',
+			businessArea: 'Technology',
+			personType: PersonType.COMPANY,
+			countryCode: 'BR',
+			zip: '89160306',
+			description: 'Company 1 description is valid!',
+		})
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(LandlineOrPhoneIsRequiredError)
+		expect(result.value).toMatchObject({
+			message:
+				'O telefone fixo ou o telefone celular da empresa é obrigatório.',
 			statusCode: 400,
 		})
 		expect(companyRepository.companies.length).toBe(0)

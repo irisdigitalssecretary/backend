@@ -7,6 +7,7 @@ import {
 } from '../../domain/repositories/company.repository'
 import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
+import { CompanyFactory } from '../../domain/factories/make-company-entity'
 
 export class InMemoryCompanyRepository implements CompanyRepository {
 	public readonly companies: CompanyEntity[] = []
@@ -229,19 +230,17 @@ export class InMemoryCompanyRepository implements CompanyRepository {
 						}
 					})
 
-					return CompanyEntity.create(
-						{
-							...selectedFields,
-							email: company.props.email,
-							address: company.props.address,
-							city: company.props.city,
-							state: company.props.state,
-							countryId: company.props.countryId,
-							taxId: company.props.taxId,
-							businessArea: company.props.businessArea,
-						},
-						company.id,
-					)
+					return CompanyFactory.reconstitute({
+						id: company.id,
+						...selectedFields,
+						email: company.props.email,
+						address: company.props.address,
+						city: company.props.city,
+						state: company.props.state,
+						countryId: company.props.countryId,
+						taxId: company.props.taxId,
+						businessArea: company.props.businessArea,
+					})
 				})
 			}
 

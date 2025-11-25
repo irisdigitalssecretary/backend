@@ -22,6 +22,7 @@ import { TooShortCompanyDescriptionError } from '../../domain/errors/too-short-c
 import { TooLongCompanyDescriptionError } from '../../domain/errors/too-long-company-description'
 import { CompanyFactory } from '../../domain/factories/make-company-entity'
 import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
+import { LandlineOrPhoneIsRequiredError } from '../../domain/errors/landline-or-phone-is-required'
 
 describe('UpdateCompanyUseCase', () => {
 	let companyRepository: InMemoryCompanyRepository
@@ -520,5 +521,61 @@ describe('UpdateCompanyUseCase', () => {
 				'A descrição da empresa deve possuir no máximo 255 caracteres.',
 			statusCode: 400,
 		})
+	})
+
+	it('should not be able to update a company if the landline and phone are not provided', async () => {
+		await companyRepository.create(
+			CompanyFactory.create(
+				{
+					name: 'Company 2',
+					email: 'company2@example.com',
+					taxId: '01894147000216',
+					address: '123 Main St',
+					city: 'Anytown',
+					state: 'Rio de Janeiro',
+					countryId: 1,
+					businessArea: 'Technology',
+					personType: PersonType.COMPANY,
+					zip: '89160306',
+					landline: '551135211980',
+					phone: '5511988899090',
+					description: 'Company 2 description is valid!',
+				},
+				{
+					taxIdValidator,
+					zipCodeValidator,
+					countryCode: 'BR',
+				},
+			),
+		)
+
+		const newData = {
+			name: 'Company 3',
+			email: 'company3@example.com',
+			taxId: '15225632963',
+			address: 'Rua das Flores, 123',
+			city: 'São Paulo',
+			state: 'São Paulo',
+			businessArea: CompanyBusinessArea.TECHNOLOGY,
+			personType: PersonType.INDIVIDUAL,
+			countryCode: 'BR',
+			zip: '89160306',
+			description: 'Company 3 description is valid!',
+		}
+
+		const result = await updateCompanyUseCase.execute(
+			newData,
+			company.props.id as number,
+		)
+
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(LandlineOrPhoneIsRequiredError)
+		expect(result.value).toMatchObject({
+			message:
+				'O telefone fixo ou o telefone celular da empresa é obrigatório.',
+			statusCode: 400,
+		})
+		console.log(companyRepository.companies.length, 'boceta')
+		expect(companyRepository.companies.length).toBe(2)
 	})
 })

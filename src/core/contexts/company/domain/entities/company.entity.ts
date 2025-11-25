@@ -10,6 +10,7 @@ import { ZipCode } from '@/core/shared/domain/value-objects/zip-code'
 import { CompanyAdress } from '../value-objects/company-adress'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
 import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
+import { LandlineOrPhoneIsRequiredError } from '../errors/landline-or-phone-is-required'
 
 export interface CompanyEntityProps {
 	id?: number
@@ -121,6 +122,8 @@ export class CompanyEntity extends Entity<CompanyEntityProps> {
 		props: CompanyEntityProps,
 		id?: UniqueEntityId,
 	): CompanyEntity {
+		this.validate(props)
+
 		return new CompanyEntity(
 			{
 				...props,
@@ -133,5 +136,11 @@ export class CompanyEntity extends Entity<CompanyEntityProps> {
 
 	public static restore(props: CompanyEntityProps): CompanyEntity {
 		return new CompanyEntity(props, UniqueEntityId.create(props.uuid))
+	}
+
+	public static validate(props: CompanyEntityProps): void {
+		if (!props.landline && !props.phone) {
+			throw new LandlineOrPhoneIsRequiredError()
+		}
 	}
 }

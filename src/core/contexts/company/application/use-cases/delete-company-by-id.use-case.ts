@@ -6,7 +6,7 @@ import { CompanyNotFoundError } from '@/core/shared/application/errors/company-n
 type DeleteCompanyUseCaseResponse = Either<CompanyNotFoundError, null>
 
 @Injectable()
-export class DeleteCompanyUseCase {
+export class DeleteCompanyByIdUseCase {
 	constructor(private readonly companyRepository: CompanyRepository) {}
 
 	public async execute(id: number): Promise<DeleteCompanyUseCaseResponse> {

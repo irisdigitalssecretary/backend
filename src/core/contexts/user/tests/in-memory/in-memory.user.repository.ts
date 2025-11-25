@@ -8,6 +8,7 @@ import {
 import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { UserFactory } from '../../domain/factories/make-user-entity'
 
 export class InMemoryUserRepository implements UserRepository {
 	public readonly users: UserEntity[] = []
@@ -176,6 +177,12 @@ export class InMemoryUserRepository implements UserRepository {
 							selectedFields[field] =
 								user[field] || user.props[field]
 						}
+					})
+
+					return UserFactory.reconstitute({
+						id: user.id,
+						...selectedFields,
+						email: user.props.email,
 					})
 
 					return UserEntity.create(

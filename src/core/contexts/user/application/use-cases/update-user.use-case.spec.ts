@@ -221,6 +221,10 @@ describe('UpdateUserUseCase', () => {
 		})
 	})
 
+	it('should be able to update a user with an email that already exists if the owner user belongs to a different company', () => {
+		expect(true).toBe(false)
+	})
+
 	it('should not be able to update a user if the old password is not provided and the password is provided', async () => {
 		const user = await userRepository.create(
 			await UserFactory.create(

@@ -69,6 +69,10 @@ describe('CreateUserUseCase', () => {
 		expect(userRepository.users.length).toBe(1)
 	})
 
+	it('should be able to create a user with an email that already exists if the owner user belongs to a different company', () => {
+		expect(true).toBe(false)
+	})
+
 	it('should not be able to create a user with an invalid email', async () => {
 		const result = await createUserUseCase.execute({
 			name: 'John Doe',

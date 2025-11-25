@@ -56,6 +56,30 @@ describe('UserController.create (E2E)', () => {
 		})
 	})
 
+	it('POST /users -> should not be able to create a user if name is not provided', async () => {
+		const newUser = {
+			name: '',
+			email: 'john.doe@example.com',
+			password: 'Test123@emaiiil',
+			phone: '+1234567890',
+		}
+
+		const response = await request(server).post('/users').send(newUser)
+		expect(response.status).toBe(400)
+		expect(response.body).toMatchObject({
+			errors: [
+				{
+					code: 'too_small',
+					message: 'Nome é obrigatório.',
+					path: ['name'],
+				},
+			],
+		})
+
+		const user = await app.get(PrismaService).user.findMany({})
+		expect(user).toHaveLength(0)
+	})
+
 	it('POST /users -> should not be able to create a user with an email that already exists', async () => {
 		const newUser = {
 			name: 'John Doe',
@@ -313,6 +337,52 @@ describe('UserController.create (E2E)', () => {
 				updatedAt: expect.any(String),
 			},
 		})
+	})
+
+	it('PUT /users/:id -> should not be able to update a user if name is not provided', async () => {
+		const newUser = {
+			name: 'John Doe',
+			email: 'john.doe@example.com',
+			password: 'Test123@emaiiil',
+			phone: '1234567890',
+		}
+
+		await request(server).post('/users').send(newUser)
+		const user = await app.get(PrismaService).user.findFirst({})
+
+		await request(server).post('/users').send({
+			name: 'John Doe',
+			email: 'john.d@example.com',
+			password: 'Test123@emaiiil',
+		})
+
+		const newData = {
+			name: '',
+			email: 'john.doe1@example.com',
+			oldPassword: newUser.password,
+			password: 'Test@1234',
+			phone: '0987654321',
+			sessionStatus: 'online',
+			status: 'active',
+		}
+
+		const response = await request(server)
+			.put(`/users/${user?.id}`)
+			.send(newData)
+
+		expect(response.status).toBe(400)
+		expect(response.body).toMatchObject({
+			errors: [
+				{
+					code: 'too_small',
+					message: 'Nome é obrigatório.',
+					path: ['name'],
+				},
+			],
+		})
+
+		const users = await app.get(PrismaService).user.findMany({})
+		expect(users).toHaveLength(2)
 	})
 
 	it('PUT /users/:id -> should be able to update a user keeping the same email', async () => {

@@ -1,7 +1,10 @@
 import { z } from 'zod'
 
 export const createUserSchema = z.object({
-	name: z.string().transform((value) => value.trim()),
+	name: z
+		.string()
+		.min(1, 'Nome é obrigatório.')
+		.transform((value) => value.trim()),
 	email: z
 		.email('E-mail inválido.')
 		.max(100, 'E-mail deve possuir no máximo 100 caracteres.')

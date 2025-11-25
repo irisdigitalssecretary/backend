@@ -3,7 +3,10 @@ import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum
 import { z } from 'zod'
 
 export const updateUserSchema = z.object({
-	name: z.string().transform((value) => value.trim()),
+	name: z
+		.string()
+		.min(1, 'Nome é obrigatório.')
+		.transform((value) => value.trim()),
 	sessionStatus: z
 		.enum(SessionStatus, {
 			message: 'Status de sessão inválido.',

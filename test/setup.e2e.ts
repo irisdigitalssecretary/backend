@@ -12,6 +12,7 @@ export default function setup() {
 		'docker compose -f docker-compose.test.yml --env-file ./.env.test up -d',
 	)
 
+	execSync('npx prisma migrate reset --force')
 	execSync('npm run migrate:test')
 
 	console.log('✅ Ambiente de testes configurado')

@@ -1,17 +1,19 @@
 import { InMemoryCompanyRepository } from '../../tests/in-memory/in-memory.company.repository'
-import { DeleteCompanyUseCase } from './delete-company.use-case'
+import { DeleteCompanyByIdUseCase } from './delete-company-by-id.use-case'
 import { CompanyFactory } from '../../domain/factories/make-company-entity'
 import { CompanyNotFoundError } from '@/core/shared/application/errors/company-not-found'
 import { PersonType } from '@/core/shared/domain/constants/company/person-type.enum'
 import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
 
-describe('DeleteCompanyUseCase', () => {
+describe('DeleteCompanyByIdUseCase', () => {
 	let companyRepository: InMemoryCompanyRepository
-	let deleteCompanyUseCase: DeleteCompanyUseCase
+	let deleteCompanyByIdUseCase: DeleteCompanyByIdUseCase
 
 	beforeEach(() => {
 		companyRepository = new InMemoryCompanyRepository()
-		deleteCompanyUseCase = new DeleteCompanyUseCase(companyRepository)
+		deleteCompanyByIdUseCase = new DeleteCompanyByIdUseCase(
+			companyRepository,
+		)
 	})
 
 	it('should be able to delete an existing company', async () => {
@@ -37,7 +39,7 @@ describe('DeleteCompanyUseCase', () => {
 		expect(companyRepository.companies).toHaveLength(1)
 		expect(companyRepository.companies[0].id?.value).toBe(company.id!.value)
 
-		const result = await deleteCompanyUseCase.execute(1)
+		const result = await deleteCompanyByIdUseCase.execute(1)
 
 		expect(result.isRight()).toBe(true)
 		expect(result.value).toBeNull()
@@ -49,7 +51,7 @@ describe('DeleteCompanyUseCase', () => {
 	})
 
 	it('should not be able to delete a non-existent company', async () => {
-		const result = await deleteCompanyUseCase.execute(999)
+		const result = await deleteCompanyByIdUseCase.execute(999)
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(CompanyNotFoundError)
