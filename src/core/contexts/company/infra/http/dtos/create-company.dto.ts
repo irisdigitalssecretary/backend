@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { PersonType } from '@/core/shared/domain/constants/company/person-type.enum'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
-import { TaxIdLocaleEnum } from '@/core/shared/domain/constants/taxId/tax-id-locale.enum'
+import { TaxIdIso2Enum } from '@/core/shared/domain/constants/taxId/tax-id-iso2.enum'
 
 export const createCompanySchema = z.object({
 	name: z
@@ -27,7 +27,7 @@ export const createCompanySchema = z.object({
 	taxId: z
 		.string('Código de identificação fiscal inválido.')
 		.min(1, 'Código de identificação fiscal é obrigatório.')
-		.transform((value) => value?.trim()),
+		.transform((value) => value?.trim().replace(/[^a-zA-Z0-9]/g, '')),
 	address: z
 		.string()
 		.min(1, 'Endereço é obrigatório.')
@@ -35,7 +35,7 @@ export const createCompanySchema = z.object({
 	zip: z
 		.string()
 		.min(1, 'Código postal é obrigatório.')
-		.transform((value) => value?.trim()),
+		.transform((value) => value?.trim().replace(/[^a-zA-Z0-9]/g, '')),
 	city: z
 		.string()
 		.min(1, 'Cidade é obrigatória.')
@@ -59,7 +59,7 @@ export const createCompanySchema = z.object({
 	personType: z.enum(PersonType, 'Tipo de pessoa inválido.'),
 	status: z.enum(CompanyStatus, 'Status inválido').optional(),
 	countryCode: z
-		.enum(TaxIdLocaleEnum, 'Código de país inválido')
+		.enum(TaxIdIso2Enum, 'Código de país inválido')
 		.transform((value) => value?.trim().toUpperCase()),
 })
 

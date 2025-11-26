@@ -8,11 +8,23 @@ import { FindManyUsersByOffsetPaginationUseCase } from './find-many-users-by-off
 import { OffsetPagination } from '@/core/shared/domain/value-objects/offset-pagination'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { makeCompany } from '@/core/shared/tests/unit/factories/make-company-test.factory'
+import { TaxIdValidatorService } from '@/core/shared/infra/services/validators/tax-id-validator.service'
+import { ZipCodeValidatorService } from '@/core/shared/infra/services/validators/zip-code-validator.service'
+import { ZipCodeValidator } from '@/core/shared/domain/infra/services/validators/zip-code-validator'
+import { TaxIdValidator } from '@/core/shared/domain/infra/services/validators/tax-id-validator'
+import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
+import { CompanyRepository } from '@/core/contexts/company/domain/repositories/company.repository'
+import { InMemoryCompanyRepository } from '@/core/contexts/company/tests/in-memory/in-memory.company.repository'
 
 describe('FindManyUsersByOffsetPaginationUseCase', () => {
 	let hasher: Hasher
 	let userRepository: UserRepository
+	let companyRepository: CompanyRepository
 	let findManyUsersByOffsetPaginationUseCase: FindManyUsersByOffsetPaginationUseCase
+	let taxIdValidator: TaxIdValidator
+	let zipCodeValidator: ZipCodeValidator
+	let company: CompanyEntity
 
 	beforeAll(() => {
 		hasher = new BcryptHasher()
@@ -20,8 +32,21 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 
 	beforeEach(async () => {
 		userRepository = new InMemoryUserRepository()
+		companyRepository = new InMemoryCompanyRepository()
 		findManyUsersByOffsetPaginationUseCase =
 			new FindManyUsersByOffsetPaginationUseCase(userRepository)
+		taxIdValidator = new TaxIdValidatorService()
+		zipCodeValidator = new ZipCodeValidatorService()
+
+		company = await companyRepository.create(
+			makeCompany(taxIdValidator, zipCodeValidator),
+		)
+
+		const company2 = await companyRepository.create(
+			makeCompany(taxIdValidator, zipCodeValidator, {
+				taxId: '01894147000216',
+			}),
+		)
 
 		const testUsers = [
 			{
@@ -61,19 +86,22 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			},
 		]
 
-		for (const userData of testUsers) {
-			const user = await UserFactory.create(
-				{
-					id: userData.id,
-					name: userData.name,
-					email: userData.email,
-					password: `${userData.id}@Example.com`,
-					status: userData.status,
-					sessionStatus: userData.sessionStatus,
-				},
-				hasher,
-			)
-			await userRepository.create(user)
+		for (const companyData of [company, company2]) {
+			for (const userData of testUsers) {
+				const user = await UserFactory.create(
+					{
+						id: userData.id,
+						name: userData.name,
+						email: userData.email,
+						password: `${userData.id}@Example.com`,
+						status: userData.status,
+						sessionStatus: userData.sessionStatus,
+						companyId: companyData.props.id!,
+					},
+					hasher,
+				)
+				await userRepository.create(user)
+			}
 		}
 	})
 
@@ -83,6 +111,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 				{
 					filters: {},
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -96,6 +125,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					pagination: OffsetPagination.create(2, 1),
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -105,16 +135,22 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 
 		it('should be able to navigate between pages correctly', async () => {
 			const firstPageResult =
-				await findManyUsersByOffsetPaginationUseCase.execute({
-					filters: {},
-					pagination: OffsetPagination.create(2, 1),
-				})
+				await findManyUsersByOffsetPaginationUseCase.execute(
+					{
+						filters: {},
+						pagination: OffsetPagination.create(2, 1),
+					},
+					company.props.id!,
+				)
 
 			const secondPageResult =
-				await findManyUsersByOffsetPaginationUseCase.execute({
-					filters: {},
-					pagination: OffsetPagination.create(2, 2),
-				})
+				await findManyUsersByOffsetPaginationUseCase.execute(
+					{
+						filters: {},
+						pagination: OffsetPagination.create(2, 2),
+					},
+					company.props.id!,
+				)
 
 			expect(firstPageResult.isRight()).toBe(true)
 			expect(secondPageResult.isRight()).toBe(true)
@@ -137,6 +173,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					pagination: OffsetPagination.create(10, 10),
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -151,6 +188,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 				{
 					filters: { name: 'Alice' },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -164,6 +202,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 				{
 					filters: { email: 'bruno@example.com' },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -177,6 +216,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 				{
 					filters: { status: UserStatus.ACTIVE },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -192,6 +232,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 				{
 					filters: { sessionStatus: SessionStatus.OFFLINE },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -210,6 +251,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 						sessionStatus: SessionStatus.ONLINE,
 					},
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -225,6 +267,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 				{
 					filters: { name: 'Usuário Inexistente' },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -240,6 +283,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					orderBy: { name: 'asc' },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -259,6 +303,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					orderBy: { name: 'desc' },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -278,6 +323,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					orderBy: { email: 'asc' },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -297,6 +343,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					orderBy: { status: 'asc' },
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -313,6 +360,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					orderBy: { name: 'asc' },
 					pagination: OffsetPagination.create(2, 1),
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -333,6 +381,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 				{
 					filters: {},
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -343,6 +392,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 		it('should be able to work without optional parameters', async () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -358,6 +408,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					select: ['name', 'email'],
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -376,6 +427,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					select: ['name'],
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -393,6 +445,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: {},
 					select: ['email'],
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -410,6 +463,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					filters: { status: UserStatus.ACTIVE },
 					select: ['name', 'email', 'status'],
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -430,6 +484,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					pagination: OffsetPagination.create(2, 1),
 					select: ['name', 'email'],
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -449,6 +504,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					orderBy: { name: 'asc' },
 					select: ['name', 'email'],
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)
@@ -475,6 +531,7 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 					pagination: OffsetPagination.create(2, 1),
 					select: ['name', 'email', 'status'],
 				},
+				company.props.id!,
 			)
 
 			expect(result.isRight()).toBe(true)

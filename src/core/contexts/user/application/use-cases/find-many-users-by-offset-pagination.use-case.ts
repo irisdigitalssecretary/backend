@@ -24,17 +24,21 @@ export class FindManyUsersByOffsetPaginationUseCase {
 
 	public async execute(
 		props: FindManyUsersByOffsetPaginationUseCaseRequest,
+		companyId: number,
 	): Promise<FindManyUsersByOffsetPaginationUseCaseResponse> {
 		return right(
-			await this.userRepository.findManyByOffsetPagination({
-				filters: props.filters,
-				pagination: OffsetPagination.create(
-					props?.pagination?.limit,
-					props?.pagination?.page,
-				),
-				orderBy: props.orderBy,
-				select: props.select,
-			}),
+			await this.userRepository.findManyByOffsetPagination(
+				{
+					filters: props.filters,
+					pagination: OffsetPagination.create(
+						props?.pagination?.limit,
+						props?.pagination?.page,
+					),
+					orderBy: props.orderBy,
+					select: props.select,
+				},
+				companyId,
+			),
 		)
 	}
 }

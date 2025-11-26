@@ -21,6 +21,7 @@ interface UpdateUserUseCaseRequest {
 	password?: string
 	oldPassword?: string
 	phone?: string
+	companyId: number
 	sessionStatus: SessionStatus
 	status: UserStatus
 }
@@ -56,6 +57,7 @@ export class UpdateUserUseCase {
 		if (props.email) {
 			userEmailAlreadyExists = await this.userRepository.findByEmail(
 				props.email,
+				userToUpdate.props.companyId,
 			)
 		}
 

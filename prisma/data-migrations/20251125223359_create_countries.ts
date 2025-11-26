@@ -4,6 +4,7 @@ import type { PrismaClient } from '@prisma/client'
 export const up: MigrationFn<{ prisma: PrismaClient }> = async ({
 	context,
 }) => {
+	console.log('🔄 Executando migration de países...')
 	const { prisma } = context
 
 	await prisma.country.createMany({

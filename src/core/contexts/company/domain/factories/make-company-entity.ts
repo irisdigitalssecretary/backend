@@ -12,7 +12,7 @@ import { CompanyAdress } from '../value-objects/company-adress'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
 import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
 
-interface MakeCompanyEntityProps {
+export interface MakeCompanyEntityProps {
 	id?: number
 	uuid?: string
 	name: string

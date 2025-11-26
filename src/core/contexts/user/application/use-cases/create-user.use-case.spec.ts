@@ -8,18 +8,39 @@ import { UserEmailExistsError } from '../errors/user-email-already-exists'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { InvalidPasswordError } from '@/core/shared/domain/errors/invalid-password-error'
 import { InvalidPhoneError } from '@/core/shared/domain/errors/invalid-phone-error'
+import { CompanyRepository } from '@/core/contexts/company/domain/repositories/company.repository'
+import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
+import { InMemoryCompanyRepository } from '@/core/contexts/company/tests/in-memory/in-memory.company.repository'
+import { TaxIdValidator } from '@/core/shared/domain/infra/services/validators/tax-id-validator'
+import { ZipCodeValidator } from '@/core/shared/domain/infra/services/validators/zip-code-validator'
+import { TaxIdValidatorService } from '@/core/shared/infra/services/validators/tax-id-validator.service'
+import { ZipCodeValidatorService } from '@/core/shared/infra/services/validators/zip-code-validator.service'
+import { makeCompany } from '@/core/shared/tests/unit/factories/make-company-test.factory'
+import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
+import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 
 describe('CreateUserUseCase', () => {
 	let hasher: Hasher
 	let userRepository: UserRepository
 	let createUserUseCase: CreateUserUseCase
+	let companyRepository: CompanyRepository
+	let company: CompanyEntity
+	let taxIdValidator: TaxIdValidator
+	let zipCodeValidator: ZipCodeValidator
 
 	beforeAll(() => {
 		hasher = new BcryptHasher()
 	})
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		userRepository = new InMemoryUserRepository()
+		companyRepository = new InMemoryCompanyRepository()
+		taxIdValidator = new TaxIdValidatorService()
+		zipCodeValidator = new ZipCodeValidatorService()
+
+		company = await companyRepository.create(
+			makeCompany(taxIdValidator, zipCodeValidator),
+		)
 		createUserUseCase = new CreateUserUseCase(userRepository, hasher)
 	})
 
@@ -28,6 +49,7 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'john.doe@example.com',
 			password: 'Teste@123',
+			companyId: company.props.id!,
 		}
 		const result = await createUserUseCase.execute(data)
 
@@ -52,12 +74,14 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'john.doe@example.com',
 			password: 'Teste@123',
+			companyId: company.props.id!,
 		})
 
 		const result = await createUserUseCase.execute({
 			name: 'John Doe 2',
 			email: 'john.doe@example.com',
 			password: 'Teste@123',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -69,8 +93,45 @@ describe('CreateUserUseCase', () => {
 		expect(userRepository.users.length).toBe(1)
 	})
 
-	it('should be able to create a user with an email that already exists if the owner user belongs to a different company', () => {
-		expect(true).toBe(false)
+	it('should be able to create a user with an email that already exists if the owner user belongs to a different company', async () => {
+		const company2 = await companyRepository.create(
+			makeCompany(taxIdValidator, zipCodeValidator, {
+				taxId: '01894147000216',
+			}),
+		)
+
+		await createUserUseCase.execute({
+			name: 'John Doe',
+			email: 'john.doe@example.com',
+			password: 'Teste@123',
+			companyId: company.props.id!,
+		})
+
+		const newData = {
+			name: 'John Doe 2',
+			email: 'john.doe@example.com',
+			password: 'Teste@123',
+			companyId: company2.props.id!,
+		}
+
+		const result = await createUserUseCase.execute(newData)
+
+		const user = userRepository.users[1]
+
+		expect(result.isRight()).toBe(true)
+		expect(userRepository.users.length).toBe(2)
+		expect(user).toBeInstanceOf(UserEntity)
+		expect(user).toMatchObject({
+			email: newData.email,
+			name: newData.name,
+			companyId: company2.props.id!,
+			sessionStatus: SessionStatus.OFFLINE,
+			status: UserStatus.ACTIVE,
+		})
+		expect(user?.password).not.toBe(newData.password)
+		void expect(
+			hasher.compare(newData.password, user?.password ?? ''),
+		).resolves.toBe(true)
 	})
 
 	it('should not be able to create a user with an invalid email', async () => {
@@ -78,6 +139,7 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'john.doe.com',
 			password: 'Teste@123',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -94,6 +156,7 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'a'.repeat(90) + '@example.com',
 			password: 'Teste@123',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -110,6 +173,7 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'john.doe@example.com',
 			password: '1234567',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -126,6 +190,7 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'john.doe@example.com',
 			password: 'Test@123456789101112131456',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -142,6 +207,7 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'john.doe@example.com',
 			password: '1234abcd',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -158,6 +224,7 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'john.doe@example.com',
 			password: '@#$%&Abcdefg',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -174,6 +241,7 @@ describe('CreateUserUseCase', () => {
 			name: 'John Doe',
 			email: 'john.doe@example.com',
 			password: 'Test123567',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -191,6 +259,7 @@ describe('CreateUserUseCase', () => {
 			email: 'john.doe@example.com',
 			password: 'Teste@123',
 			phone: '12345678901234567890',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -208,6 +277,7 @@ describe('CreateUserUseCase', () => {
 			email: 'john.doe@example.com',
 			password: 'Teste@123',
 			phone: '123456789',
+			companyId: company.props.id!,
 		})
 
 		expect(result.isLeft()).toBe(true)

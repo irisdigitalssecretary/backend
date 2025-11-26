@@ -13,49 +13,55 @@ import { OldPasswordInvalidError } from '../../domain/errors/old-password-invali
 import { OldPasswordRequiredError } from '../../domain/errors/old-password-required'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
+import { InMemoryCompanyRepository } from '@/core/contexts/company/tests/in-memory/in-memory.company.repository'
+import { CompanyRepository } from '@/core/contexts/company/domain/repositories/company.repository'
+import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
+import { CompanyFactory } from '@/core/contexts/company/domain/factories/make-company-entity'
+import { PersonType } from '@/core/shared/domain/constants/company/person-type.enum'
+import { TaxIdValidatorService } from '@/core/shared/infra/services/validators/tax-id-validator.service'
+import { ZipCodeValidatorService } from '@/core/shared/infra/services/validators/zip-code-validator.service'
+import { TaxIdValidator } from '@/core/shared/domain/infra/services/validators/tax-id-validator'
+import { ZipCodeValidator } from '@/core/shared/domain/infra/services/validators/zip-code-validator'
+import { makeUser } from '@/core/shared/tests/unit/factories/make-user-test.factory'
+import { makeCompany } from '@/core/shared/tests/unit/factories/make-company-test.factory'
 
 describe('UpdateUserUseCase', () => {
 	let hasher: Hasher
 	let userRepository: UserRepository
+	let companyRepository: CompanyRepository
 	let updateUserUseCase: UpdateUserUseCase
+	let userCompany: CompanyEntity
+	let userToUpdate: UserEntity
+	let taxIdValidator: TaxIdValidator
+	let zipCodeValidator: ZipCodeValidator
 
 	beforeAll(() => {
 		hasher = new BcryptHasher()
 	})
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		userRepository = new InMemoryUserRepository()
 		updateUserUseCase = new UpdateUserUseCase(userRepository, hasher)
+		companyRepository = new InMemoryCompanyRepository()
+
+		taxIdValidator = new TaxIdValidatorService()
+		zipCodeValidator = new ZipCodeValidatorService()
+
+		userCompany = await companyRepository.create(
+			makeCompany(taxIdValidator, zipCodeValidator),
+		)
+
+		await userRepository.create(
+			await makeUser(Number(userCompany.props.id), hasher),
+		)
+
+		userToUpdate = await userRepository.create(
+			await makeUser(Number(userCompany.props.id), hasher),
+		)
 	})
 
 	it('should be able to update a user', async () => {
-		await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe2@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const oldData = { ...user.props }
+		const oldData = { ...userToUpdate.props }
 
 		const newData = {
 			name: 'John Doe 1',
@@ -64,11 +70,12 @@ describe('UpdateUserUseCase', () => {
 			oldPassword: 'Test@123',
 			sessionStatus: SessionStatus.AWAY,
 			status: UserStatus.INACTIVE,
+			companyId: userToUpdate.props.companyId,
 		}
 
 		const result = await updateUserUseCase.execute(
 			newData,
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		const userUpdated = userRepository.users[1]
@@ -88,33 +95,7 @@ describe('UpdateUserUseCase', () => {
 	})
 
 	it('should be able to update a user keeping the same email', async () => {
-		await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe2@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const oldData = { ...user.props }
+		const oldData = { ...userToUpdate.props }
 
 		const newData = {
 			name: 'John Doe 1',
@@ -123,11 +104,12 @@ describe('UpdateUserUseCase', () => {
 			oldPassword: 'Test@123',
 			sessionStatus: SessionStatus.AWAY,
 			status: UserStatus.INACTIVE,
+			companyId: userToUpdate.props.companyId,
 		}
 
 		const result = await updateUserUseCase.execute(
 			newData,
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		const userUpdated = userRepository.users[1]
@@ -155,8 +137,9 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			1,
+			123839478235,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -165,52 +148,21 @@ describe('UpdateUserUseCase', () => {
 			statusCode: 404,
 		})
 		expect(result.value).toBeInstanceOf(UserNotFoundError)
-		expect(userRepository.users.length).toBe(0)
+		expect(userRepository.users.length).toBe(2)
 	})
 
 	it('should not be able to update a user if the email already exists', async () => {
-		const emailToUpdate = 'john.doe@example.com'
-
-		await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: emailToUpdate,
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		const user2 = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe2@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
-		expect(userRepository.users.length).toBe(2)
-		expect(userRepository.users[0].email).toBe(emailToUpdate)
-		expect(userRepository.users[0].id).toBeDefined()
-
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
-				email: emailToUpdate,
+				email: `john.doe${userToUpdate.companyId}@example.com`,
 				password: 'Test@123',
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user2.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -221,24 +173,73 @@ describe('UpdateUserUseCase', () => {
 		})
 	})
 
-	it('should be able to update a user with an email that already exists if the owner user belongs to a different company', () => {
-		expect(true).toBe(false)
-	})
+	it('should be able to update a user with an email that already exists if the owner user belongs to a different company', async () => {
+		userCompany = await companyRepository.create(
+			CompanyFactory.create(
+				{
+					name: 'Company 2',
+					email: 'company2@example.com',
+					taxId: '01894147000216',
+					address: '123 Main St',
+					city: 'Anytown',
+					state: 'Rio de Janeiro',
+					countryId: 1,
+					businessArea: 'Technology',
+					personType: PersonType.COMPANY,
+					zip: '89160306',
+					landline: '551135211980',
+					phone: '5511988899090',
+					description: 'Company 2 description is valid!',
+				},
+				{
+					taxIdValidator,
+					zipCodeValidator,
+					countryCode: 'BR',
+				},
+			),
+		)
 
-	it('should not be able to update a user if the old password is not provided and the password is provided', async () => {
-		const user = await userRepository.create(
+		userToUpdate = await userRepository.create(
 			await UserFactory.create(
 				{
 					name: 'John Doe',
-					email: 'john.doe@example.com',
+					email: 'john.doe1@example.com',
 					password: 'Test@123',
 					sessionStatus: SessionStatus.ONLINE,
 					status: UserStatus.ACTIVE,
+					companyId: Number(userCompany.props.id),
 				},
 				hasher,
 			),
 		)
 
+		const newData = {
+			name: 'John Doe',
+			email: `john.doe${userToUpdate.props.id}@example.com`,
+			password: 'Test@123',
+			oldPassword: 'Test@123',
+			sessionStatus: SessionStatus.ONLINE,
+			status: UserStatus.ACTIVE,
+			companyId: userToUpdate.props.companyId,
+		}
+
+		const result = await updateUserUseCase.execute(
+			newData,
+			userToUpdate.props.id as number,
+		)
+
+		expect(result.isRight()).toBe(true)
+		expect(userRepository.users[2]).toMatchObject({
+			name: newData.name,
+			email: newData.email,
+			password: expect.any(String),
+			sessionStatus: newData.sessionStatus,
+			status: newData.status,
+			companyId: userToUpdate.props.companyId,
+		})
+	})
+
+	it('should not be able to update a user if the old password is not provided and the password is provided', async () => {
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
@@ -246,8 +247,9 @@ describe('UpdateUserUseCase', () => {
 				password: 'Test@1234',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -262,19 +264,6 @@ describe('UpdateUserUseCase', () => {
 	})
 
 	it('should not be able to update a user if the old password is invalid', async () => {
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
@@ -283,8 +272,9 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Teste@111',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -299,19 +289,6 @@ describe('UpdateUserUseCase', () => {
 	})
 
 	it('should not be able to update a user if the password without uppercase letter', async () => {
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
@@ -320,8 +297,9 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -336,19 +314,6 @@ describe('UpdateUserUseCase', () => {
 	})
 
 	it('should not be able to update a user if the password without number', async () => {
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
@@ -357,8 +322,9 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -373,19 +339,6 @@ describe('UpdateUserUseCase', () => {
 	})
 
 	it('should not be able to update a user with a password with less than 8 characters', async () => {
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
@@ -394,8 +347,9 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -410,19 +364,6 @@ describe('UpdateUserUseCase', () => {
 	})
 
 	it('should not be able to update a user with a password longer than 16 characters', async () => {
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
@@ -431,8 +372,9 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -447,19 +389,6 @@ describe('UpdateUserUseCase', () => {
 	})
 
 	it('should not be able to update a user with a password without special character', async () => {
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
@@ -468,8 +397,9 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)
@@ -484,19 +414,6 @@ describe('UpdateUserUseCase', () => {
 	})
 
 	it('should not be able to update a user if the email is invalid', async () => {
-		const user = await userRepository.create(
-			await UserFactory.create(
-				{
-					name: 'John Doe',
-					email: 'john.doe@example.com',
-					password: 'Test@123',
-					sessionStatus: SessionStatus.ONLINE,
-					status: UserStatus.ACTIVE,
-				},
-				hasher,
-			),
-		)
-
 		const result = await updateUserUseCase.execute(
 			{
 				name: 'John Doe',
@@ -505,8 +422,9 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
+				companyId: userToUpdate.props.companyId,
 			},
-			user.props.id as number,
+			userToUpdate.props.id as number,
 		)
 
 		expect(result.isLeft()).toBe(true)

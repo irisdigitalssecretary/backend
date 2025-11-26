@@ -21,9 +21,14 @@ export class InMemoryUserRepository implements UserRepository {
 		})
 	}
 
-	public findByEmail(email: string): Promise<UserEntity | null> {
+	public findByEmail(
+		email: string,
+		companyId: number,
+	): Promise<UserEntity | null> {
 		return new Promise((resolve) => {
-			const user = this.users.find((user) => user.email === email)
+			const user = this.users.find(
+				(user) => user.email === email && user.companyId === companyId,
+			)
 			resolve(user ?? null)
 		})
 	}
@@ -35,9 +40,14 @@ export class InMemoryUserRepository implements UserRepository {
 		})
 	}
 
-	public findByUuid(uuid: string): Promise<UserEntity | null> {
+	public findByUuid(
+		uuid: string,
+		companyId: number,
+	): Promise<UserEntity | null> {
 		return new Promise((resolve) => {
-			const user = this.users.find((user) => user.uuid === uuid)
+			const user = this.users.find(
+				(user) => user.uuid === uuid && user.companyId === companyId,
+			)
 			resolve(user ?? null)
 		})
 	}
@@ -87,6 +97,7 @@ export class InMemoryUserRepository implements UserRepository {
 			OffsetPagination,
 			UserSelectableFields
 		>,
+		companyId: number,
 	): Promise<UserEntity[]> {
 		return new Promise((resolve) => {
 			const { filters, select, orderBy } = props
@@ -128,7 +139,7 @@ export class InMemoryUserRepository implements UserRepository {
 					)
 				}
 
-				return condition
+				return condition && user.companyId === companyId
 			})
 
 			const orderByEntries = Object.entries(orderBy || {})

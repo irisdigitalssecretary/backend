@@ -8,6 +8,7 @@ import { OldPasswordRequiredError } from '../errors/old-password-required'
 import { OldPasswordInvalidError } from '../errors/old-password-invalid'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
+import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
 
 interface UpdatePasswordEntityProps {
 	hasher: Hasher
@@ -21,6 +22,8 @@ export interface UserEntityProps {
 	name: string
 	email: Email
 	password?: Password
+	companyId: number
+	company?: CompanyEntity
 	sessionStatus?: SessionStatus
 	status?: UserStatus
 	phone?: Phone
@@ -87,6 +90,10 @@ export class UserEntity extends Entity<UserEntityProps> {
 
 	public get updatedAt(): Date {
 		return this.props.updatedAt || new Date()
+	}
+
+	public get companyId(): number {
+		return this.props.companyId
 	}
 
 	public async updatePassword({

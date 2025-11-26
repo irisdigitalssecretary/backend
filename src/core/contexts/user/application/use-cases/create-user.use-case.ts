@@ -14,6 +14,7 @@ interface CreateUserUseCaseRequest {
 	email: string
 	password: string
 	phone?: string
+	companyId: number
 }
 
 type CreateUserUseCaseResponse = Either<
@@ -33,6 +34,7 @@ export class CreateUserUseCase {
 	): Promise<CreateUserUseCaseResponse> {
 		const userEmailAlreadyExists = await this.userRepository.findByEmail(
 			props.email,
+			props.companyId,
 		)
 
 		if (userEmailAlreadyExists) {

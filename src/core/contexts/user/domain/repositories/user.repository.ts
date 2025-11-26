@@ -21,9 +21,15 @@ export type UserSelectableFields = keyof UserFields
 export abstract class UserRepository {
 	public abstract readonly users: UserEntity[]
 	abstract create(user: UserEntity): Promise<UserEntity>
-	abstract findByEmail(email: string): Promise<UserEntity | null>
+	abstract findByEmail(
+		email: string,
+		companyId: number,
+	): Promise<UserEntity | null>
 	abstract findById(id: number): Promise<UserEntity | null>
-	abstract findByUuid(uuid: string): Promise<UserEntity | null>
+	abstract findByUuid(
+		uuid: string,
+		companyId: number,
+	): Promise<UserEntity | null>
 	abstract update(user: UserEntity): Promise<UserEntity>
 	abstract delete(id: number): Promise<void>
 	abstract updateSessionStatus(
@@ -37,5 +43,6 @@ export abstract class UserRepository {
 			OffsetPagination,
 			UserSelectableFields
 		>,
+		companyId: number,
 	): Promise<UserEntity[]>
 }

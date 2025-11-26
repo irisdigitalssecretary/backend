@@ -29,8 +29,12 @@ export class PrismaUserRepository implements UserRepository {
 		return UserMapper.toDomain(createdUser)
 	}
 
-	async findByEmail(email: string): Promise<UserEntity | null> {
-		const user = await this.prisma.user.findFirst({ where: { email } })
+	async findByEmail(
+		email: string,
+		companyId: number,
+	): Promise<UserEntity | null> {
+		const prisma = this.prisma.withCompany(companyId)
+		const user = await prisma.user.findFirst({ where: { email } })
 		return user ? UserMapper.toDomain(user) : null
 	}
 
@@ -38,12 +42,15 @@ export class PrismaUserRepository implements UserRepository {
 		const user = await this.prisma.user.findUnique({
 			where: { id },
 		})
-
 		return user ? UserMapper.toDomain(user) : null
 	}
 
-	async findByUuid(uuid: string): Promise<UserEntity | null> {
-		const user = await this.prisma.user.findUnique({
+	async findByUuid(
+		uuid: string,
+		companyId: number,
+	): Promise<UserEntity | null> {
+		const prisma = this.prisma.withCompany(companyId)
+		const user = await prisma.user.findUnique({
 			where: { uuid },
 		})
 		return user ? UserMapper.toDomain(user) : null
@@ -82,8 +89,9 @@ export class PrismaUserRepository implements UserRepository {
 			OffsetPagination,
 			UserSelectableFields
 		>,
+		companyId: number,
 	): Promise<UserEntity[]> {
-		const prisma = this.prisma
+		const prisma = this.prisma.withCompany(companyId)
 		const { filters } = props
 		const whereClause: Prisma.UserWhereInput = {}
 

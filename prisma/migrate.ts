@@ -4,12 +4,20 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 const command = process.argv[2] || 'up'
 
+const isTestEnvironment = process.env.APP_ENV === 'test'
+
 const umzug = new Umzug({
 	migrations: {
-		glob: 'prisma/data-migrations/*.ts',
+		glob: isTestEnvironment
+			? 'prisma/test/data-migrations/*.ts'
+			: 'prisma/data-migrations/*.ts',
 	},
 	context: { prisma },
-	storage: new JSONStorage({ path: 'prisma/data-migrations-log.json' }),
+	storage: new JSONStorage({
+		path: isTestEnvironment
+			? 'prisma/test/data-migrations-log.json'
+			: 'prisma/data-migrations-log.json',
+	}),
 	logger: console,
 })
 

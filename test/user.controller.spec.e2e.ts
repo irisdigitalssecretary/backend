@@ -3,7 +3,7 @@ import request from 'supertest'
 import { createApp } from './utils/create-app'
 import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
 
-describe('UserController.create (E2E)', () => {
+describe('UserController (E2E)', () => {
 	let app: INestApplication
 	let server: any
 

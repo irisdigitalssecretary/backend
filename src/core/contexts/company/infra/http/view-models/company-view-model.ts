@@ -3,7 +3,7 @@ import { CompanyEntity } from '../../../domain/entities/company.entity'
 export class CompanyViewModel {
 	static toHTTP(company: CompanyEntity) {
 		return {
-			id: company.id,
+			id: company.props.id,
 			uuid: company.uuid,
 			name: company.name,
 			email: company.email,

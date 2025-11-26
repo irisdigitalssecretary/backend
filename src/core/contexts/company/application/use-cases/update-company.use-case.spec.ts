@@ -575,7 +575,6 @@ describe('UpdateCompanyUseCase', () => {
 				'O telefone fixo ou o telefone celular da empresa é obrigatório.',
 			statusCode: 400,
 		})
-		console.log(companyRepository.companies.length, 'boceta')
 		expect(companyRepository.companies.length).toBe(2)
 	})
 })

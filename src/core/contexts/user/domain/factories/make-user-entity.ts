@@ -5,6 +5,7 @@ import { Hasher } from '@/core/shared/domain/infra/services/crypt/hasher'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
+import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
 
 interface MakeUserEntityProps {
 	id?: number
@@ -13,6 +14,8 @@ interface MakeUserEntityProps {
 	email: string
 	password?: string
 	phone?: string
+	companyId: number
+	company?: CompanyEntity
 	sessionStatus?: SessionStatus
 	status?: UserStatus
 	createdAt?: Date
