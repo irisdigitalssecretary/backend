@@ -441,7 +441,7 @@ describe('UpdateCompanyUseCase', () => {
 		expect(result.value).toBeInstanceOf(TooShortCompanyAdressError)
 		expect(result.value).toMatchObject({
 			message:
-				'A endereço da empresa deve possuir no mínimo 20 caracteres.',
+				'O endereço da empresa deve possuir no mínimo 10 caracteres.',
 			statusCode: 400,
 		})
 	})
@@ -466,7 +466,7 @@ describe('UpdateCompanyUseCase', () => {
 		expect(result.value).toBeInstanceOf(TooLongCompanyAdressError)
 		expect(result.value).toMatchObject({
 			message:
-				'A endereço da empresa deve possuir no máximo 255 caracteres.',
+				'O endereço da empresa deve possuir no máximo 255 caracteres.',
 			statusCode: 400,
 		})
 	})
@@ -572,7 +572,7 @@ describe('UpdateCompanyUseCase', () => {
 		expect(result.value).toBeInstanceOf(LandlineOrPhoneIsRequiredError)
 		expect(result.value).toMatchObject({
 			message:
-				'O telefone fixo ou o telefone celular da empresa é obrigatório.',
+				'É necessário informar o telefone fixo ou o telefone celular da empresa.',
 			statusCode: 400,
 		})
 		expect(companyRepository.companies.length).toBe(2)

@@ -35,7 +35,7 @@ export class TaxId extends ValueObject<TaxIdProps> {
 			throw new TaxIdRequiredError()
 		}
 
-		if (!props.countryCode || !props.countryCode.trim()) {
+		if (!props.countryCode?.trim()) {
 			throw new TaxIdRequiredError()
 		}
 

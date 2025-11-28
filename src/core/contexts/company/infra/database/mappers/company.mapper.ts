@@ -24,6 +24,7 @@ export class CompanyMapper {
 			status: CompanyStatus[company.status?.toUpperCase()] ?? undefined,
 			createdAt: company.createdAt,
 			updatedAt: company.updatedAt,
+			phone: company.phone ?? undefined,
 		})
 	}
 
@@ -42,6 +43,7 @@ export class CompanyMapper {
 			businessArea: company.businessArea,
 			personType: company.personType,
 			status: company.status,
+			phone: company.phone,
 		}
 	}
 }

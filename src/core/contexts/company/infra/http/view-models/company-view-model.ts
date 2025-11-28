@@ -19,6 +19,7 @@ export class CompanyViewModel {
 			status: company.status,
 			createdAt: company.createdAt,
 			updatedAt: company.updatedAt,
+			state: company.state,
 		}
 	}
 }

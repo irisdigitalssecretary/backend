@@ -230,7 +230,7 @@ describe('CreateCompanyUseCase', () => {
 		expect(companyRepository.companies.length).toBe(0)
 	})
 
-	it('should not be able to create a company with an invalid phone', async () => {
+	it('should not be able to create a company with an phone number too short', async () => {
 		const result = await createCompanyUseCase.execute({
 			name: 'Company 1',
 			email: 'company@example.com',
@@ -252,7 +252,29 @@ describe('CreateCompanyUseCase', () => {
 		expect(companyRepository.companies.length).toBe(0)
 	})
 
-	it('should not be able to create a company with an invalid landline', async () => {
+	it('should not be able to create a company with an phone number too long', async () => {
+		const result = await createCompanyUseCase.execute({
+			name: 'Company 1',
+			email: 'company@example.com',
+			taxId: '01894147000135',
+			address: '123 Main St',
+			city: 'Anytown',
+			state: 'Rio de Janeiro',
+			businessArea: CompanyBusinessArea.TECHNOLOGY,
+			personType: PersonType.COMPANY,
+			countryCode: 'BR',
+			phone: '1234567890123423434',
+		})
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidPhoneError)
+		expect(result.value).toMatchObject({
+			message: 'Telefone deve possuir no máximo 16 caracteres.',
+			statusCode: 400,
+		})
+		expect(companyRepository.companies.length).toBe(0)
+	})
+
+	it('should not be able to create a company with an landline number too short', async () => {
 		const result = await createCompanyUseCase.execute({
 			name: 'Company 1',
 			email: 'company@example.com',
@@ -269,6 +291,28 @@ describe('CreateCompanyUseCase', () => {
 		expect(result.value).toBeInstanceOf(InvalidLandlineError)
 		expect(result.value).toMatchObject({
 			message: 'Telefone fixo deve possuir no mínimo 10 caracteres.',
+			statusCode: 400,
+		})
+		expect(companyRepository.companies.length).toBe(0)
+	})
+
+	it('should not be able to create a company with an landline number too long', async () => {
+		const result = await createCompanyUseCase.execute({
+			name: 'Company 1',
+			email: 'company@example.com',
+			taxId: '01894147000135',
+			address: '123 Main St',
+			city: 'Anytown',
+			state: 'Rio de Janeiro',
+			businessArea: CompanyBusinessArea.TECHNOLOGY,
+			personType: PersonType.COMPANY,
+			countryCode: 'BR',
+			landline: '1234567890123423434',
+		})
+		expect(result.isLeft()).toBe(true)
+		expect(result.value).toBeInstanceOf(InvalidLandlineError)
+		expect(result.value).toMatchObject({
+			message: 'Telefone fixo deve possuir no máximo 16 caracteres.',
 			statusCode: 400,
 		})
 		expect(companyRepository.companies.length).toBe(0)
@@ -312,7 +356,7 @@ describe('CreateCompanyUseCase', () => {
 		expect(result.value).toBeInstanceOf(TooShortCompanyAdressError)
 		expect(result.value).toMatchObject({
 			message:
-				'A endereço da empresa deve possuir no mínimo 20 caracteres.',
+				'O endereço da empresa deve possuir no mínimo 10 caracteres.',
 			statusCode: 400,
 		})
 		expect(companyRepository.companies.length).toBe(0)
@@ -334,7 +378,7 @@ describe('CreateCompanyUseCase', () => {
 		expect(result.value).toBeInstanceOf(TooLongCompanyAdressError)
 		expect(result.value).toMatchObject({
 			message:
-				'A endereço da empresa deve possuir no máximo 255 caracteres.',
+				'O endereço da empresa deve possuir no máximo 255 caracteres.',
 			statusCode: 400,
 		})
 		expect(companyRepository.companies.length).toBe(0)
@@ -405,7 +449,7 @@ describe('CreateCompanyUseCase', () => {
 		expect(result.value).toBeInstanceOf(LandlineOrPhoneIsRequiredError)
 		expect(result.value).toMatchObject({
 			message:
-				'O telefone fixo ou o telefone celular da empresa é obrigatório.',
+				'É necessário informar o telefone fixo ou o telefone celular da empresa.',
 			statusCode: 400,
 		})
 		expect(companyRepository.companies.length).toBe(0)

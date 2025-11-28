@@ -3,7 +3,7 @@ import { PersonType } from '@/core/shared/domain/constants/company/person-type.e
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
 import { TaxIdIso2Enum } from '@/core/shared/domain/constants/taxId/tax-id-iso2.enum'
 
-export const createCompanySchema = z.object({
+export const updateCompanySchema = z.object({
 	name: z
 		.string()
 		.min(1, 'Nome é obrigatório.')
@@ -25,8 +25,8 @@ export const createCompanySchema = z.object({
 		.optional()
 		.transform((value) => value?.trim().replace(/[^0-9]/g, '')),
 	taxId: z
-		.string()
-		.min(2, 'Código de identificação fiscal é obrigatório.')
+		.string('Código de identificação fiscal inválido.')
+		.min(1, 'Código de identificação fiscal é obrigatório.')
 		.transform((value) => value?.trim().replace(/[^a-zA-Z0-9]/g, '')),
 	address: z
 		.string()
@@ -67,4 +67,4 @@ export const createCompanySchema = z.object({
 		.transform((value) => value?.trim().toUpperCase()),
 })
 
-export type CreateCompanyBody = z.infer<typeof createCompanySchema>
+export type UpdateCompanyBody = z.infer<typeof updateCompanySchema>

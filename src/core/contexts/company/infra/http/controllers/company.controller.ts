@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, Post } from '@nestjs/common'
+import { Body, Controller, HttpException, Post, Put } from '@nestjs/common'
 import { CreateCompanyUseCase } from '../../../application/use-cases/create-company.use-case'
 import { ZodValidationPipe } from '@/core/shared/infra/http/pipes/zod-validation-pipes'
 import {
@@ -61,4 +61,11 @@ export class CompanyController {
 			company: CompanyViewModel.toHTTP(result.value),
 		}
 	}
+
+	// @Put(':id')
+	// async update(
+	// 	@Param('id', ParseIntPipe) id: number,
+	// 	@Body(new ZodValidationPipe(updateCompanySchema))
+	// 	body: UpdateCompanyBody,
+	// ) {}
 }

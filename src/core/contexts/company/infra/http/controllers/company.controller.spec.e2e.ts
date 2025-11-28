@@ -3,7 +3,7 @@ import request from 'supertest'
 import { PrismaService } from '@/core/shared/infra/services/database/prisma/prisma.service'
 import { createApp } from 'test/utils/create-app'
 
-describe.only('CompanyController.create (E2E)', () => {
+describe('CompanyController.create (E2E)', () => {
 	let app: INestApplication
 	let server: any
 
@@ -41,15 +41,16 @@ describe.only('CompanyController.create (E2E)', () => {
 			.post('/companies')
 			.send(newCompany)
 
+		delete (newCompany as any).countryCode
+
 		expect(response.status).toBe(201)
 		expect(response.body).toMatchObject({
 			company: {
 				...newCompany,
 				id: expect.any(Number),
 				uuid: expect.any(String),
-				createdAt: expect.any(String),
-				updatedAt: expect.any(String),
-				status: 'onboarding',
+				createdAt: expect.anything(),
+				updatedAt: expect.anything(),
 				phone: newCompany.phone.replace(/[^0-9]/g, ''),
 				landline: newCompany.landline.replace(/[^0-9]/g, ''),
 				taxId: newCompany.taxId.replace(/[^a-zA-Z0-9]/g, ''),
@@ -62,13 +63,123 @@ describe.only('CompanyController.create (E2E)', () => {
 			...newCompany,
 			id: expect.any(Number),
 			uuid: expect.any(String),
-			createdAt: expect.any(String),
-			updatedAt: expect.any(String),
+			createdAt: expect.anything(),
+			updatedAt: expect.anything(),
 			status: 'onboarding',
 			phone: newCompany.phone.replace(/[^0-9]/g, ''),
 			landline: newCompany.landline.replace(/[^0-9]/g, ''),
 			taxId: newCompany.taxId.replace(/[^a-zA-Z0-9]/g, ''),
 			zip: newCompany.zip.replace(/[^a-zA-Z0-9]/g, ''),
 		})
+	})
+
+	it('POST /companies -> should not be able to create a company if taxId already exists', async () => {
+		const company1 = {
+			name: 'Company 1',
+			email: 'company1@example.com',
+			taxId: '01894147000135',
+			address: '123 Main St',
+			city: 'Anytown',
+			state: 'Rio de Janeiro',
+			businessArea: 'Technology',
+			personType: 'company',
+			countryCode: 'BR',
+			zip: '89160306',
+			landline: '+551135211980',
+			phone: '+5511988899090',
+			description: 'Company 1 description is valid!',
+		}
+
+		await request(server).post('/companies').send(company1)
+
+		const response = await request(server)
+			.post('/companies')
+			.send({
+				...company1,
+				email: 'company2@example.com',
+			})
+
+		expect(response.status).toBe(409)
+		expect(response.body).toMatchObject({
+			message: 'Já existe uma empresa com este código fiscal cadastrado',
+			statusCode: 409,
+		})
+
+		const companies = await app.get(PrismaService).company.findMany({})
+		expect(companies).toHaveLength(1)
+	})
+
+	it('POST /companies -> should not be able to create a company if email already exists', async () => {
+		const company1 = {
+			name: 'Company 1',
+			email: 'company1@example.com',
+			taxId: '01894147000135',
+			address: '123 Main St',
+			city: 'Anytown',
+			state: 'Rio de Janeiro',
+			businessArea: 'Technology',
+			personType: 'company',
+			countryCode: 'BR',
+			zip: '89160306',
+			landline: '+551135211980',
+			phone: '+5511988899090',
+			description: 'Company 1 description is valid!',
+		}
+
+		await request(server).post('/companies').send(company1)
+
+		const response = await request(server)
+			.post('/companies')
+			.send({
+				...company1,
+				taxId: '01894147000216',
+			})
+
+		expect(response.status).toBe(409)
+		expect(response.body).toMatchObject({
+			message: 'Já existe uma empresa com este email cadastrado',
+			statusCode: 409,
+		})
+
+		const companies = await app.get(PrismaService).company.findMany({})
+		expect(companies).toHaveLength(1)
+	})
+
+	it('POST /companies -> should not be able to create a company if country is not found', async () => {
+		const newCompany = {
+			name: 'Company 1',
+			email: 'company1@example.com',
+			taxId: '01894147000135',
+			address: '123 Main St',
+			city: 'Anytown',
+			state: 'Rio de Janeiro',
+			businessArea: 'Technology',
+			personType: 'company',
+			countryCode: 'ASAAS',
+			zip: '89160306',
+			landline: '+551135211980',
+			phone: '+5511988899090',
+			description: 'Company 1 description is valid!',
+		}
+
+		const response = await request(server)
+			.post('/companies')
+			.send(newCompany)
+
+		expect(response.status).toBe(400)
+		expect(response.body).toMatchObject({
+			errors: [
+				{
+					code: 'invalid_value',
+					path: ['countryCode'],
+					message: 'Código de país inválido',
+				},
+			],
+			statusCode: 400,
+			message: 'Validation failed',
+		})
+
+		const companies = await app.get(PrismaService).company.findMany({})
+		expect(companies).toHaveLength(0)
 	})
 })
