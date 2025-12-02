@@ -20,6 +20,7 @@ export interface CompanyFields {
 	description: string | null
 	businessArea: string
 	personType: PersonType
+	status: CompanyStatus
 	createdAt: Date
 	updatedAt: Date
 }

@@ -80,7 +80,8 @@ export class CompanyFactory {
 			countryId: props.countryId,
 			taxId,
 			description,
-			businessArea: CompanyBusinessArea[props.businessArea.toUpperCase()],
+			businessArea:
+				CompanyBusinessArea[props.businessArea?.toUpperCase()],
 		})
 	}
 
@@ -100,7 +101,8 @@ export class CompanyFactory {
 				: undefined,
 			personType,
 			address: CompanyAdress.restore(props.address),
-			businessArea: CompanyBusinessArea[props.businessArea.toUpperCase()],
+			businessArea:
+				CompanyBusinessArea[props.businessArea?.toUpperCase()],
 		})
 	}
 }

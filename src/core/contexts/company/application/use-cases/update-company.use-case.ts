@@ -82,7 +82,7 @@ export class UpdateCompanyUseCase {
 
 		if (
 			companyEmailAlreadyExists &&
-			companyEmailAlreadyExists.id !== companyToUpdate.id
+			companyEmailAlreadyExists.props.id !== companyToUpdate.props.id
 		) {
 			return left(new CompanyEmailAlreadyExistsError())
 		}
@@ -121,6 +121,7 @@ export class UpdateCompanyUseCase {
 			companyToUpdate.props = {
 				...companyToUpdate.props,
 				...company.props,
+				id: companyToUpdate.props.id,
 			}
 
 			const result = await this.companyRepository.update(companyToUpdate)

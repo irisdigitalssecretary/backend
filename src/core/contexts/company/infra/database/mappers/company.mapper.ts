@@ -1,7 +1,8 @@
-import { Company, CompanyStatus } from '@prisma/client'
 import { CompanyFactory } from '../../../domain/factories/make-company-entity'
 import { CompanyEntity } from '../../../domain/entities/company.entity'
 import { PersonType } from '@/core/shared/domain/constants/company/person-type.enum'
+import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
+import { Company } from '@prisma/client'
 
 export class CompanyMapper {
 	static toDomain(company: Company): CompanyEntity {

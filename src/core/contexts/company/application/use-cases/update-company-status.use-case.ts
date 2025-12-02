@@ -28,9 +28,11 @@ export class UpdateCompanyStatusUseCase {
 			return left(new CompanyNotFoundError())
 		}
 
-		await this.companyRepository.updateStatus(props.id, props.status)
+		const companyUpdated = await this.companyRepository.updateStatus(
+			props.id,
+			props.status,
+		)
 
-		return right(company)
+		return right(companyUpdated)
 	}
 }
-

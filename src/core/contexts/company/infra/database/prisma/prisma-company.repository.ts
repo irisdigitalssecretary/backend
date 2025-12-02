@@ -159,6 +159,10 @@ export class PrismaCompanyRepository implements CompanyRepository {
 			whereClause.countryId = filters.countryId
 		}
 
+		if (filters?.status) {
+			whereClause.status = filters.status
+		}
+
 		const companies = await prisma.company.findMany({
 			where: whereClause,
 			skip: props.pagination?.after,
