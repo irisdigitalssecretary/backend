@@ -8,13 +8,7 @@ import { UserEmailExistsError } from '../errors/user-email-already-exists'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { InvalidPasswordError } from '@/core/shared/domain/errors/invalid-password-error'
 import { InvalidPhoneError } from '@/core/shared/domain/errors/invalid-phone-error'
-import { CompanyRepository } from '@/core/contexts/company/domain/repositories/company.repository'
 import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
-import { InMemoryCompanyRepository } from '@/core/contexts/company/tests/in-memory/in-memory.company.repository'
-import { TaxIdValidator } from '@/core/shared/domain/infra/services/validators/tax-id-validator'
-import { ZipCodeValidator } from '@/core/shared/domain/infra/services/validators/zip-code-validator'
-import { TaxIdValidatorService } from '@/core/shared/infra/services/validators/tax-id-validator.service'
-import { ZipCodeValidatorService } from '@/core/shared/infra/services/validators/zip-code-validator.service'
 import { makeCompany } from '@/core/shared/tests/unit/factories/make-company-test.factory'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
@@ -23,10 +17,7 @@ describe('CreateUserUseCase', () => {
 	let hasher: Hasher
 	let userRepository: UserRepository
 	let createUserUseCase: CreateUserUseCase
-	let companyRepository: CompanyRepository
 	let company: CompanyEntity
-	let taxIdValidator: TaxIdValidator
-	let zipCodeValidator: ZipCodeValidator
 
 	beforeAll(() => {
 		hasher = new BcryptHasher()
@@ -34,13 +25,8 @@ describe('CreateUserUseCase', () => {
 
 	beforeEach(async () => {
 		userRepository = new InMemoryUserRepository()
-		companyRepository = new InMemoryCompanyRepository()
-		taxIdValidator = new TaxIdValidatorService()
-		zipCodeValidator = new ZipCodeValidatorService()
 
-		company = await companyRepository.create(
-			makeCompany(taxIdValidator, zipCodeValidator),
-		)
+		company = await makeCompany()
 		createUserUseCase = new CreateUserUseCase(userRepository, hasher)
 	})
 
@@ -94,11 +80,9 @@ describe('CreateUserUseCase', () => {
 	})
 
 	it('should be able to create a user with an email that already exists if the owner user belongs to a different company', async () => {
-		const company2 = await companyRepository.create(
-			makeCompany(taxIdValidator, zipCodeValidator, {
-				taxId: '01894147000216',
-			}),
-		)
+		const company2 = await makeCompany({
+			taxId: '01894147000216',
+		})
 
 		await createUserUseCase.execute({
 			name: 'John Doe',

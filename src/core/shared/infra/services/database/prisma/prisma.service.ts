@@ -8,10 +8,9 @@ export class PrismaService extends PrismaClient {
 
 	constructor() {
 		super({
-			log:
-				env.APP_ENV === 'production'
-					? ['warn', 'error']
-					: ['query', 'info', 'warn', 'error'],
+			log: ['production', 'test'].includes(env.APP_ENV)
+				? ['warn', 'error']
+				: ['query', 'info', 'warn', 'error'],
 			datasourceUrl: env.DATABASE_URL,
 		})
 	}

@@ -3,7 +3,7 @@ import { UniqueEntityId } from '../value-objects/unique-entity-id'
 export abstract class Entity<T> {
 	constructor(
 		public props: T,
-		public readonly id?: UniqueEntityId,
+		public readonly id: UniqueEntityId,
 	) {}
 
 	public equals(object?: Entity<T>): boolean {

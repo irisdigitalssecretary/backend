@@ -9,6 +9,7 @@ import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { UserFactory } from '../../domain/factories/make-user-entity'
+import { resolveInMemoryOrdering } from '@/core/shared/tests/unit/utils/helpers/resolve-in-memory-ordering'
 
 export class InMemoryUserRepository implements UserRepository {
 	public readonly users: UserEntity[] = []
@@ -54,8 +55,8 @@ export class InMemoryUserRepository implements UserRepository {
 
 	public update(userToUpdate: UserEntity): Promise<UserEntity> {
 		return new Promise((resolve) => {
-			const index = this.users.findIndex(
-				(user) => userToUpdate.props.id === user.props.id,
+			const index = this.users.findIndex((user) =>
+				userToUpdate.equals(user),
 			)
 
 			this.users[index] = userToUpdate
@@ -139,40 +140,18 @@ export class InMemoryUserRepository implements UserRepository {
 					)
 				}
 
+				if (filters?.id) {
+					condition = !!(condition && user.props.id === filters.id)
+				}
+
+				if (filters?.uuid) {
+					condition = !!(condition && user.uuid === filters.uuid)
+				}
+
 				return condition && user.companyId === companyId
 			})
 
-			const orderByEntries = Object.entries(orderBy || {})
-			users = users.sort((a, b) => {
-				for (const [field, direction] of orderByEntries) {
-					let compareResult = 0
-
-					const fieldA = a[field]
-					const fieldB = b[field]
-
-					if (fieldA && fieldB) {
-						if (
-							typeof fieldA === 'string' &&
-							typeof fieldB === 'string'
-						) {
-							compareResult = String(fieldA)
-								.toLowerCase()
-								.localeCompare(
-									String(fieldB).toLowerCase(),
-									'pt-BR',
-								)
-						}
-					}
-
-					if (compareResult !== 0) {
-						return direction === 'desc'
-							? -compareResult
-							: compareResult
-					}
-				}
-
-				return 0
-			})
+			users = resolveInMemoryOrdering(users, orderBy)
 
 			users = users.slice(
 				props.pagination?.after,
@@ -190,11 +169,14 @@ export class InMemoryUserRepository implements UserRepository {
 						}
 					})
 
-					return UserFactory.reconstitute({
-						id: user.id,
-						...selectedFields,
-						email: user.props.email,
-					})
+					return UserFactory.reconstitute(
+						{
+							id: user.id,
+							...selectedFields,
+							email: user.props.email,
+						},
+						user.uuid,
+					)
 
 					return UserEntity.create(
 						{

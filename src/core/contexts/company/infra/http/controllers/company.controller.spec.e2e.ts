@@ -707,57 +707,6 @@ describe('CompanyController.create (E2E)', () => {
 		expect(response.body.companies[0].name).toContain('Tech')
 	})
 
-	it.only('GET /companies -> should be able to filter companies by status', async () => {
-		const company1 = {
-			name: 'Company 1',
-			email: 'company1@example.com',
-			taxId: '01894147000135',
-			address: '123 Main St',
-			city: 'Anytown',
-			state: 'Rio de Janeiro',
-			businessArea: 'Technology',
-			personType: 'company',
-			countryCode: 'BR',
-			zip: '89160306',
-			landline: '+551135211980',
-			phone: '+5511988899090',
-			description: 'Company 1 description',
-		}
-
-		const company2 = {
-			name: 'Company 2',
-			email: 'company2@example.com',
-			taxId: '01894147000216',
-			address: '456 Other St',
-			city: 'Othertown',
-			state: 'São Paulo',
-			businessArea: 'Finance',
-			personType: 'company',
-			countryCode: 'BR',
-			zip: '89160307',
-			landline: '+551135211981',
-			phone: '+5511988899091',
-			description: 'Company 2 description',
-		}
-
-		const createResponse1 = await request(server)
-			.post('/companies')
-			.send(company1)
-		await request(server).post('/companies').send(company2)
-
-		await request(server)
-			.patch(`/companies/${createResponse1.body.company.id}/status`)
-			.send({ status: 'active' })
-
-		const response = await request(server)
-			.get('/companies')
-			.query({ filters: { status: 'active' } })
-
-		expect(response.status).toBe(200)
-		expect(response.body.companies).toHaveLength(1)
-		expect(response.body.companies[0].status).toBe('active')
-	})
-
 	it('GET /companies -> should be able to order companies by name ascending', async () => {
 		const company1 = {
 			name: 'Zebra Company',

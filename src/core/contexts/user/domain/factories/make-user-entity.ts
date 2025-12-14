@@ -32,7 +32,6 @@ export class UserFactory {
 
 		return UserEntity.create({
 			...props,
-			uuid: props.uuid,
 			email: Email.create(props.email),
 			phone,
 			password,
@@ -41,20 +40,22 @@ export class UserFactory {
 		})
 	}
 
-	static reconstitute(props: MakeUserEntityProps) {
+	static reconstitute(props: MakeUserEntityProps, uuid: string) {
 		const phone = props.phone ? Phone.restore(props.phone) : undefined
 		const password = props.password
 			? Password.restore(props.password)
 			: undefined
 
-		return UserEntity.restore({
-			...props,
-			uuid: props.uuid,
-			email: Email.restore(props.email),
-			phone,
-			password,
-			createdAt: props.createdAt || new Date(),
-			updatedAt: props.updatedAt || new Date(),
-		})
+		return UserEntity.restore(
+			{
+				...props,
+				email: Email.restore(props.email),
+				phone,
+				password,
+				createdAt: props.createdAt || new Date(),
+				updatedAt: props.updatedAt || new Date(),
+			},
+			uuid,
+		)
 	}
 }

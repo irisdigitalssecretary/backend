@@ -30,6 +30,9 @@ export const envSchema = z.object({
 
 	//App
 	APP_ENV: z.string().default('development'),
+
+	//Secrets
+	MASTER_KEY: z.string(),
 })
 
 export const env = envSchema.parse(process.env)

@@ -16,8 +16,9 @@ export class FindUserByUuidUseCase {
 
 	public async execute(
 		props: FindUserByUuidUseCaseRequest,
+		companyId: number,
 	): Promise<FindUserByUuidUseCaseResponse> {
-		const user = await this.userRepository.findByUuid(props.uuid)
+		const user = await this.userRepository.findByUuid(props.uuid, companyId)
 
 		if (!user) {
 			return left(new UserNotFoundError())

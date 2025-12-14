@@ -9,21 +9,12 @@ import { OffsetPagination } from '@/core/shared/domain/value-objects/offset-pagi
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { makeCompany } from '@/core/shared/tests/unit/factories/make-company-test.factory'
-import { TaxIdValidatorService } from '@/core/shared/infra/services/validators/tax-id-validator.service'
-import { ZipCodeValidatorService } from '@/core/shared/infra/services/validators/zip-code-validator.service'
-import { ZipCodeValidator } from '@/core/shared/domain/infra/services/validators/zip-code-validator'
-import { TaxIdValidator } from '@/core/shared/domain/infra/services/validators/tax-id-validator'
 import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
-import { CompanyRepository } from '@/core/contexts/company/domain/repositories/company.repository'
-import { InMemoryCompanyRepository } from '@/core/contexts/company/tests/in-memory/in-memory.company.repository'
 
 describe('FindManyUsersByOffsetPaginationUseCase', () => {
 	let hasher: Hasher
 	let userRepository: UserRepository
-	let companyRepository: CompanyRepository
 	let findManyUsersByOffsetPaginationUseCase: FindManyUsersByOffsetPaginationUseCase
-	let taxIdValidator: TaxIdValidator
-	let zipCodeValidator: ZipCodeValidator
 	let company: CompanyEntity
 
 	beforeAll(() => {
@@ -32,22 +23,14 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 
 	beforeEach(async () => {
 		userRepository = new InMemoryUserRepository()
-		companyRepository = new InMemoryCompanyRepository()
 		findManyUsersByOffsetPaginationUseCase =
 			new FindManyUsersByOffsetPaginationUseCase(userRepository)
-		taxIdValidator = new TaxIdValidatorService()
-		zipCodeValidator = new ZipCodeValidatorService()
 
-		company = await companyRepository.create(
-			makeCompany(taxIdValidator, zipCodeValidator),
-		)
+		company = await makeCompany()
 
-		const company2 = await companyRepository.create(
-			makeCompany(taxIdValidator, zipCodeValidator, {
-				taxId: '01894147000216',
-			}),
-		)
-
+		const company2 = await makeCompany({
+			taxId: '01894147000216',
+		})
 		const testUsers = [
 			{
 				id: 1,
@@ -183,6 +166,44 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 	})
 
 	describe('Filters', () => {
+		it('should be able to filter users by id', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: { id: 1 },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(1)
+			expect(users[0].props.id).toBe(1)
+		})
+
+		it('should be able to filter users by uuid', async () => {
+			const allUsersResult =
+				await findManyUsersByOffsetPaginationUseCase.execute(
+					{
+						filters: {},
+					},
+					company.props.id!,
+				)
+			const allUsers = allUsersResult.value as UserEntity[]
+			const targetUuid = allUsers[0].uuid
+
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: { uuid: targetUuid },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(1)
+			expect(users[0].uuid).toBe(targetUuid)
+		})
+
 		it('should be able to filter users by name', async () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
@@ -209,6 +230,32 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			const users = result.value as UserEntity[]
 			expect(users).toHaveLength(1)
 			expect(users[0].email).toBe('bruno@example.com')
+		})
+
+		it('should be able to filter users by phone', async () => {
+			const allUsersResult =
+				await findManyUsersByOffsetPaginationUseCase.execute(
+					{
+						filters: {},
+					},
+					company.props.id!,
+				)
+			const allUsers = allUsersResult.value as UserEntity[]
+			const targetPhone = allUsers[0].phone
+
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: { phone: targetPhone },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users.length).toBeGreaterThanOrEqual(1)
+			users.forEach((user) => {
+				expect(user.phone).toBe(targetPhone)
+			})
 		})
 
 		it('should be able to filter users by status', async () => {
@@ -241,6 +288,52 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			users.forEach((user) => {
 				expect(user.sessionStatus).toBe(SessionStatus.OFFLINE)
 			})
+		})
+
+		it('should be able to filter users by createdAt', async () => {
+			const allUsersResult =
+				await findManyUsersByOffsetPaginationUseCase.execute(
+					{
+						filters: {},
+					},
+					company.props.id!,
+				)
+			const allUsers = allUsersResult.value as UserEntity[]
+			const targetCreatedAt = allUsers[0].createdAt
+
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: { createdAt: targetCreatedAt },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users.length).toBeGreaterThanOrEqual(1)
+		})
+
+		it('should be able to filter users by updatedAt', async () => {
+			const allUsersResult =
+				await findManyUsersByOffsetPaginationUseCase.execute(
+					{
+						filters: {},
+					},
+					company.props.id!,
+				)
+			const allUsers = allUsersResult.value as UserEntity[]
+			const targetUpdatedAt = allUsers[0].updatedAt
+
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: { updatedAt: targetUpdatedAt },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users.length).toBeGreaterThanOrEqual(1)
 		})
 
 		it('should be able to combine multiple filters', async () => {
@@ -277,6 +370,86 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 	})
 
 	describe('Ordering', () => {
+		it('should be able to sort users by id in ascending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { id: 'asc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(users[i - 1].props.id!).toBeLessThanOrEqual(
+					users[i].props.id!,
+				)
+			}
+		})
+
+		it('should be able to sort users by id in descending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { id: 'desc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(users[i - 1].props.id!).toBeGreaterThanOrEqual(
+					users[i].props.id!,
+				)
+			}
+		})
+
+		it('should be able to sort users by uuid in ascending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { uuid: 'asc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(
+					users[i - 1].uuid.localeCompare(users[i].uuid),
+				).toBeLessThanOrEqual(0)
+			}
+		})
+
+		it('should be able to sort users by uuid in descending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { uuid: 'desc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(
+					users[i - 1].uuid.localeCompare(users[i].uuid),
+				).toBeGreaterThanOrEqual(0)
+			}
+		})
+
 		it('should be able to sort users by name in ascending order', async () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
@@ -337,7 +510,67 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			}
 		})
 
-		it('should be able to sort users by status', async () => {
+		it('should be able to sort users by email in descending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { email: 'desc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(
+					users[i - 1].email.localeCompare(users[i].email),
+				).toBeGreaterThanOrEqual(0)
+			}
+		})
+
+		it('should be able to sort users by phone in ascending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { phone: 'asc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(
+					users[i - 1].phone.localeCompare(users[i].phone),
+				).toBeLessThanOrEqual(0)
+			}
+		})
+
+		it('should be able to sort users by phone in descending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { phone: 'desc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(
+					users[i - 1].phone.localeCompare(users[i].phone),
+				).toBeGreaterThanOrEqual(0)
+			}
+		})
+
+		it('should be able to sort users by status in ascending order', async () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
 					filters: {},
@@ -349,6 +582,128 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			expect(result.isRight()).toBe(true)
 			const users = result.value as UserEntity[]
 			expect(users).toHaveLength(5)
+		})
+
+		it('should be able to sort users by status in descending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { status: 'desc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+		})
+
+		it('should be able to sort users by sessionStatus in ascending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { sessionStatus: 'asc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+		})
+
+		it('should be able to sort users by sessionStatus in descending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { sessionStatus: 'desc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+		})
+
+		it('should be able to sort users by createdAt in ascending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { createdAt: 'asc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(users[i - 1].createdAt.getTime()).toBeLessThanOrEqual(
+					users[i].createdAt.getTime(),
+				)
+			}
+		})
+
+		it('should be able to sort users by createdAt in descending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { createdAt: 'desc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(users[i - 1].createdAt.getTime()).toBeGreaterThanOrEqual(
+					users[i].createdAt.getTime(),
+				)
+			}
+		})
+
+		it('should be able to sort users by updatedAt in ascending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { updatedAt: 'asc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(users[i - 1].updatedAt.getTime()).toBeLessThanOrEqual(
+					users[i].updatedAt.getTime(),
+				)
+			}
+		})
+
+		it('should be able to sort users by updatedAt in descending order', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					orderBy: { updatedAt: 'desc' },
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			for (let i = 1; i < users.length; i++) {
+				expect(users[i - 1].updatedAt.getTime()).toBeGreaterThanOrEqual(
+					users[i].updatedAt.getTime(),
+				)
+			}
 		})
 	})
 
@@ -421,6 +776,42 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 			})
 		})
 
+		it('should be able to select only id field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['id'],
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.props.id).toBeDefined()
+			})
+		})
+
+		it('should be able to select only uuid field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['uuid'],
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.uuid).toBeDefined()
+			})
+		})
+
 		it('should be able to select only name field', async () => {
 			const result = await findManyUsersByOffsetPaginationUseCase.execute(
 				{
@@ -454,6 +845,132 @@ describe('FindManyUsersByOffsetPaginationUseCase', () => {
 
 			users.forEach((user) => {
 				expect(user.email).toBeDefined()
+			})
+		})
+
+		it('should be able to select only phone field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['phone'],
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.phone).toBeDefined()
+			})
+		})
+
+		it('should be able to select only status field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['status'],
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.status).toBeDefined()
+			})
+		})
+
+		it('should be able to select only sessionStatus field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['sessionStatus'],
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.sessionStatus).toBeDefined()
+			})
+		})
+
+		it('should be able to select only createdAt field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['createdAt'],
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.createdAt).toBeDefined()
+			})
+		})
+
+		it('should be able to select only updatedAt field', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: ['updatedAt'],
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.updatedAt).toBeDefined()
+			})
+		})
+
+		it('should be able to select multiple fields including all field types', async () => {
+			const result = await findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: {},
+					select: [
+						'id',
+						'uuid',
+						'name',
+						'email',
+						'phone',
+						'status',
+						'sessionStatus',
+						'createdAt',
+						'updatedAt',
+					],
+				},
+				company.props.id!,
+			)
+
+			expect(result.isRight()).toBe(true)
+			const users = result.value as UserEntity[]
+			expect(users).toHaveLength(5)
+
+			users.forEach((user) => {
+				expect(user.props.id).toBeDefined()
+				expect(user.uuid).toBeDefined()
+				expect(user.name).toBeDefined()
+				expect(user.email).toBeDefined()
+				expect(user.phone).toBeDefined()
+				expect(user.status).toBeDefined()
+				expect(user.sessionStatus).toBeDefined()
+				expect(user.createdAt).toBeDefined()
+				expect(user.updatedAt).toBeDefined()
 			})
 		})
 

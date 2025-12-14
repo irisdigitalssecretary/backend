@@ -47,9 +47,7 @@ describe('UpdateUserUseCase', () => {
 		taxIdValidator = new TaxIdValidatorService()
 		zipCodeValidator = new ZipCodeValidatorService()
 
-		userCompany = await companyRepository.create(
-			makeCompany(taxIdValidator, zipCodeValidator),
-		)
+		userCompany = await makeCompany()
 
 		await userRepository.create(
 			await makeUser(Number(userCompany.props.id), hasher),
@@ -70,7 +68,6 @@ describe('UpdateUserUseCase', () => {
 			oldPassword: 'Test@123',
 			sessionStatus: SessionStatus.AWAY,
 			status: UserStatus.INACTIVE,
-			companyId: userToUpdate.props.companyId,
 		}
 
 		const result = await updateUserUseCase.execute(
@@ -104,7 +101,6 @@ describe('UpdateUserUseCase', () => {
 			oldPassword: 'Test@123',
 			sessionStatus: SessionStatus.AWAY,
 			status: UserStatus.INACTIVE,
-			companyId: userToUpdate.props.companyId,
 		}
 
 		const result = await updateUserUseCase.execute(
@@ -137,7 +133,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			123839478235,
 		)
@@ -160,7 +155,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)
@@ -220,7 +214,6 @@ describe('UpdateUserUseCase', () => {
 			oldPassword: 'Test@123',
 			sessionStatus: SessionStatus.ONLINE,
 			status: UserStatus.ACTIVE,
-			companyId: userToUpdate.props.companyId,
 		}
 
 		const result = await updateUserUseCase.execute(
@@ -247,7 +240,6 @@ describe('UpdateUserUseCase', () => {
 				password: 'Test@1234',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)
@@ -272,7 +264,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Teste@111',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)
@@ -297,7 +288,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)
@@ -322,7 +312,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)
@@ -347,7 +336,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)
@@ -372,7 +360,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)
@@ -397,7 +384,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)
@@ -422,7 +408,6 @@ describe('UpdateUserUseCase', () => {
 				oldPassword: 'Test@123',
 				sessionStatus: SessionStatus.ONLINE,
 				status: UserStatus.ACTIVE,
-				companyId: userToUpdate.props.companyId,
 			},
 			userToUpdate.props.id as number,
 		)

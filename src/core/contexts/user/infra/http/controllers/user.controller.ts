@@ -10,6 +10,7 @@ import {
 	Delete,
 	Get,
 	Query,
+	UseGuards,
 } from '@nestjs/common'
 import { type CreateUserBody, createUserSchema } from '../dtos/create-user.dto'
 import { ZodValidationPipe } from '@/core/shared/infra/http/pipes/zod-validation-pipes'
@@ -39,7 +40,13 @@ import {
 	UserSelectableFields,
 } from '../../../domain/repositories/user.repository'
 import { Pagination } from '@/core/shared/application/utils/pagination'
+import {
+	User,
+	type UserContext,
+} from '@/core/shared/infra/http/decorators/user.decorator'
+import { HybridAuthGuard } from '@/core/shared/infra/http/guards/hybrid-auth.guard'
 
+@UseGuards(HybridAuthGuard)
 @Controller('users')
 export class UserController {
 	constructor(
@@ -55,14 +62,17 @@ export class UserController {
 	@Post()
 	async create(
 		@Body(new ZodValidationPipe(createUserSchema)) body: CreateUserBody,
+		@User() user: UserContext,
 	) {
 		const { name, email, password, phone } = body
+		const { companyId } = user
 
 		const result = await this.createUserUseCase.execute({
 			name,
 			email,
 			password,
 			phone,
+			companyId: Number(companyId),
 		})
 
 		if (result.isLeft()) {
@@ -172,8 +182,12 @@ export class UserController {
 	}
 
 	@Get(':uuid')
-	async findByUuid(@Param('uuid') uuid: string) {
-		const result = await this.findUserByUuidUseCase.execute({ uuid })
+	async findByUuid(@Param('uuid') uuid: string, @User() user: UserContext) {
+		const { companyId } = user
+		const result = await this.findUserByUuidUseCase.execute(
+			{ uuid },
+			Number(companyId),
+		)
 
 		if (result.isLeft()) {
 			throw new HttpException(
@@ -191,16 +205,21 @@ export class UserController {
 	async findMany(
 		@Query(new ZodValidationPipe(findManyUsersSchema))
 		query: FindManyUsersQuery,
+		@User() user: UserContext,
 	) {
 		const { filters, pagination, orderBy, select } = query
+		const { companyId } = user
 
 		const result =
-			await this.findManyUsersByOffsetPaginationUseCase.execute({
-				filters: filters as UserFields,
-				pagination: pagination as Pagination,
-				orderBy,
-				select: select as UserSelectableFields[] | undefined,
-			})
+			await this.findManyUsersByOffsetPaginationUseCase.execute(
+				{
+					filters: filters as UserFields,
+					pagination: pagination as Pagination,
+					orderBy,
+					select: select as UserSelectableFields[] | undefined,
+				},
+				Number(companyId),
+			)
 
 		if (result.isLeft()) {
 			throw new HttpException('Erro ao buscar usuários', 500)

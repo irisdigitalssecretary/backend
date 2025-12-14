@@ -24,7 +24,8 @@
 		"migrate:prod": "npx prisma migrate deploy",
 		"migrate:dev": "dotenv -e .env -- npx prisma migrate dev",
 		"migrate:test": "dotenv -e .env.test -- npx prisma migrate dev",
-		"coverage": "vitest run --coverage"
+		"coverage": "vitest run --coverage",
+		"script:test": "tsx test.ts"
 	},
 	"dependencies": {
 		"@nestjs/common": "^11.0.1",

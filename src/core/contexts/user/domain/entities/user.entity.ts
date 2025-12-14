@@ -18,7 +18,6 @@ interface UpdatePasswordEntityProps {
 
 export interface UserEntityProps {
 	id?: number
-	uuid?: string
 	name: string
 	email: Email
 	password?: Password
@@ -32,8 +31,8 @@ export interface UserEntityProps {
 }
 
 export class UserEntity extends Entity<UserEntityProps> {
-	public get uuid(): string | undefined {
-		return this.props.uuid || this.id?.value
+	public get uuid(): string {
+		return this.id.value
 	}
 
 	public get sessionStatus(): SessionStatus | undefined {
@@ -131,7 +130,7 @@ export class UserEntity extends Entity<UserEntityProps> {
 		)
 	}
 
-	public static restore(props: UserEntityProps): UserEntity {
-		return new UserEntity(props, UniqueEntityId.create(props.uuid))
+	public static restore(props: UserEntityProps, id: string): UserEntity {
+		return new UserEntity(props, UniqueEntityId.create(id))
 	}
 }

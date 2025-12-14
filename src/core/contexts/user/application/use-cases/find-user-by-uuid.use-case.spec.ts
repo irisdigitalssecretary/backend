@@ -6,25 +6,32 @@ import { UserEntity } from '../../domain/entities/user.entity'
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
 import { UserFactory } from '../../domain/factories/make-user-entity'
 import { FindUserByUuidUseCase } from './find-user-by-uuid.use-case'
+import { makeCompany } from '@/core/shared/tests/unit/factories/make-company-test.factory'
+import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
 
 describe('FindUserByUuidUseCase', () => {
 	let hasher: Hasher
 	let userRepository: UserRepository
 	let findUserByUuidUseCase: FindUserByUuidUseCase
+	let company: CompanyEntity
 
 	beforeAll(() => {
 		hasher = new BcryptHasher()
 	})
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		userRepository = new InMemoryUserRepository()
 		findUserByUuidUseCase = new FindUserByUuidUseCase(userRepository)
+		company = await makeCompany()
 	})
 
 	it('should not be able to find a user if it does not exist', async () => {
-		const result = await findUserByUuidUseCase.execute({
-			uuid: 'non-existent-uuid',
-		})
+		const result = await findUserByUuidUseCase.execute(
+			{
+				uuid: 'non-existent-uuid',
+			},
+			company.props.id!,
+		)
 
 		expect(result.isLeft()).toBe(true)
 		expect(result.value).toBeInstanceOf(UserNotFoundError)
@@ -36,15 +43,13 @@ describe('FindUserByUuidUseCase', () => {
 	})
 
 	it('should be able to find a user by uuid', async () => {
-		const uuid = '123e4567-e89b-12d3-a456-426614174000'
-
-		await userRepository.create(
+		const userCreated = await userRepository.create(
 			await UserFactory.create(
 				{
-					uuid,
 					name: 'John Doe',
 					email: 'john.doe@example.com',
 					password: 'Test@123',
+					companyId: company.props.id!,
 				},
 				hasher,
 			),
@@ -52,7 +57,12 @@ describe('FindUserByUuidUseCase', () => {
 
 		expect(userRepository.users.length).toBe(1)
 
-		const result = await findUserByUuidUseCase.execute({ uuid })
+		const result = await findUserByUuidUseCase.execute(
+			{
+				uuid: userCreated.id.value,
+			},
+			company.props.id!,
+		)
 
 		expect(result.isRight()).toBe(true)
 
@@ -63,7 +73,7 @@ describe('FindUserByUuidUseCase', () => {
 		const user = result.value
 		expect(user).toBeInstanceOf(UserEntity)
 		expect(user).toMatchObject({
-			uuid,
+			uuid: userCreated.id.value,
 			email: 'john.doe@example.com',
 			name: 'John Doe',
 		})

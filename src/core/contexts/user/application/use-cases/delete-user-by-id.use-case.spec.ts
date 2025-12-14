@@ -5,19 +5,23 @@ import { InMemoryUserRepository } from '../../tests/in-memory/in-memory.user.rep
 import { UserNotFoundError } from '../../../../shared/application/errors/user-not-found'
 import { UserFactory } from '../../domain/factories/make-user-entity'
 import { DeleteUserByIdUseCase } from './delete-user-by-id.use-case'
+import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
+import { makeCompany } from '@/core/shared/tests/unit/factories/make-company-test.factory'
 
 describe('DeleteUserByIdUseCase', () => {
 	let hasher: Hasher
 	let userRepository: UserRepository
 	let deleteUserByIdUseCase: DeleteUserByIdUseCase
+	let company: CompanyEntity
 
 	beforeAll(() => {
 		hasher = new BcryptHasher()
 	})
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		userRepository = new InMemoryUserRepository()
 		deleteUserByIdUseCase = new DeleteUserByIdUseCase(userRepository)
+		company = await makeCompany()
 	})
 
 	it('should not be able to delete a user if it does not exist', async () => {
@@ -37,15 +41,13 @@ describe('DeleteUserByIdUseCase', () => {
 	})
 
 	it('should be able to delete a user by id', async () => {
-		const uuid = '123e4567-e89b-12d3-a456-426614174000'
-
 		const user = await userRepository.create(
 			await UserFactory.create(
 				{
-					uuid,
 					name: 'John Doe',
 					email: 'john.doe@example.com',
 					password: 'Test@123',
+					companyId: company.props.id!,
 				},
 				hasher,
 			),

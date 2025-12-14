@@ -8,6 +8,7 @@ import {
 import { FindManyOptions } from '@/core/shared/domain/utils/types/find-many'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
 import { CompanyFactory } from '../../domain/factories/make-company-entity'
+import { resolveInMemoryOrdering } from '@/core/shared/tests/unit/utils/helpers/resolve-in-memory-ordering'
 
 export class InMemoryCompanyRepository implements CompanyRepository {
 	public readonly companies: CompanyEntity[] = []
@@ -182,37 +183,7 @@ export class InMemoryCompanyRepository implements CompanyRepository {
 				return condition
 			})
 
-			const orderByEntries = Object.entries(orderBy || {})
-			companies = companies.sort((a, b) => {
-				for (const [field, direction] of orderByEntries) {
-					let compareResult = 0
-
-					const fieldA = a[field]
-					const fieldB = b[field]
-
-					if (fieldA && fieldB) {
-						if (
-							typeof fieldA === 'string' &&
-							typeof fieldB === 'string'
-						) {
-							compareResult = String(fieldA)
-								.toLowerCase()
-								.localeCompare(
-									String(fieldB).toLowerCase(),
-									'pt-BR',
-								)
-						}
-					}
-
-					if (compareResult !== 0) {
-						return direction === 'desc'
-							? -compareResult
-							: compareResult
-					}
-				}
-
-				return 0
-			})
+			companies = resolveInMemoryOrdering(companies, orderBy)
 
 			companies = companies.slice(
 				props.pagination?.after,
