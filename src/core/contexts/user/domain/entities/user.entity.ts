@@ -133,4 +133,13 @@ export class UserEntity extends Entity<UserEntityProps> {
 	public static restore(props: UserEntityProps, id: string): UserEntity {
 		return new UserEntity(props, UniqueEntityId.create(id))
 	}
+
+	public update(props: Partial<UserEntityProps>): UserEntity {
+		this._props = {
+			...this.props,
+			...props,
+		}
+
+		return this
+	}
 }

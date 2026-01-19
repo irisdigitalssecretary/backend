@@ -359,6 +359,7 @@ describe('UpdateCompanyUseCase', () => {
 				personType: PersonType.COMPANY,
 				countryCode: 'BR',
 				phone: '123',
+				zip: company.zip,
 			},
 			company.props.id as number,
 		)
@@ -384,6 +385,7 @@ describe('UpdateCompanyUseCase', () => {
 				personType: PersonType.COMPANY,
 				countryCode: 'BR',
 				landline: '123',
+				zip: company.zip,
 			},
 			company.props.id as number,
 		)
@@ -433,6 +435,7 @@ describe('UpdateCompanyUseCase', () => {
 				businessArea: CompanyBusinessArea.TECHNOLOGY,
 				personType: PersonType.COMPANY,
 				countryCode: 'BR',
+				zip: company.zip,
 			},
 			company.props.id as number,
 		)
@@ -458,6 +461,7 @@ describe('UpdateCompanyUseCase', () => {
 				businessArea: CompanyBusinessArea.TECHNOLOGY,
 				personType: PersonType.COMPANY,
 				countryCode: 'BR',
+				zip: company.zip,
 			},
 			company.props.id as number,
 		)
@@ -484,6 +488,7 @@ describe('UpdateCompanyUseCase', () => {
 				personType: PersonType.COMPANY,
 				countryCode: 'BR',
 				description: 'a',
+				zip: company.zip,
 			},
 			company.props.id as number,
 		)
@@ -510,6 +515,7 @@ describe('UpdateCompanyUseCase', () => {
 				personType: PersonType.COMPANY,
 				countryCode: 'BR',
 				description: 'a'.repeat(501),
+				zip: company.zip,
 			},
 			company.props.id as number,
 		)

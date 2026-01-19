@@ -37,7 +37,7 @@ describe('DeleteCompanyByIdUseCase', () => {
 		await companyRepository.create(company)
 
 		expect(companyRepository.companies).toHaveLength(1)
-		expect(companyRepository.companies[0].id?.value).toBe(company.id!.value)
+		expect(companyRepository.companies[0].id?.value).toBe(company.id.value)
 
 		const result = await deleteCompanyByIdUseCase.execute(1)
 

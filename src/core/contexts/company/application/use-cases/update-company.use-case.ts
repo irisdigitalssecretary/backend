@@ -3,7 +3,6 @@ import { CompanyRepository } from '../../domain/repositories/company.repository'
 import { CompanyEntity } from '../../domain/entities/company.entity'
 import { CompanyTaxIdAlreadyExistsError } from '../errors/company-tax-id-already-exists'
 import { Either, left, right } from '@/core/shared/domain/base/either'
-import { CompanyFactory } from '../../domain/factories/make-company-entity'
 import { ZipCodeValidator } from '@/core/shared/domain/infra/services/validators/zip-code-validator'
 import { TaxIdValidator } from '@/core/shared/domain/infra/services/validators/tax-id-validator'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
@@ -22,6 +21,14 @@ import { InvalidPhoneError } from '@/core/shared/domain/errors/invalid-phone-err
 import { InvalidLandlineError } from '@/core/shared/domain/errors/invalid-landline-error'
 import { InvalidEmailError } from '@/core/shared/domain/errors/invalid-email-error'
 import { CompanyNotFoundError } from '@/core/shared/application/errors/company-not-found'
+import { Landline } from '@/core/shared/domain/value-objects/landline'
+import { Phone } from '@/core/shared/domain/value-objects/phone'
+import { Email } from '@/core/shared/domain/value-objects/email'
+import { CompanyAdress } from '../../domain/value-objects/company-adress'
+import { ZipCode } from '@/core/shared/domain/value-objects/zip-code'
+import { TaxId } from '@/core/shared/domain/value-objects/tax-id'
+import { CompanyDescription } from '../../domain/value-objects/company-description'
+import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
 
 interface UpdateCompanyUseCaseRequest {
 	name: string
@@ -30,7 +37,7 @@ interface UpdateCompanyUseCaseRequest {
 	phone?: string
 	taxId: string
 	address: string
-	zip?: string
+	zip: string
 	city: string
 	state: string
 	description?: string
@@ -106,23 +113,41 @@ export class UpdateCompanyUseCase {
 		}
 
 		try {
-			const company = CompanyFactory.create(
-				{
-					...props,
-					countryId: Number(countryFromCode.id?.value),
-				},
-				{
-					taxIdValidator: this.taxIdValidator,
-					zipCodeValidator: this.zipCodeValidator,
-					countryCode: countryFromCode.iso2,
-				},
-			)
-
-			companyToUpdate.props = {
-				...companyToUpdate.props,
-				...company.props,
-				id: companyToUpdate.props.id,
-			}
+			companyToUpdate.update({
+				...props,
+				landline: props.landline
+					? Landline.create(props.landline)
+					: undefined,
+				phone: props.phone ? Phone.create(props.phone) : undefined,
+				email: props.email ? Email.create(props.email) : undefined,
+				address: props.address
+					? CompanyAdress.create(props.address)
+					: undefined,
+				zip: ZipCode.create(
+					{
+						value: props.zip,
+						countryCode: countryFromCode.iso2,
+					},
+					this.zipCodeValidator,
+				),
+				taxId: TaxId.create(
+					{
+						code: props.taxId,
+						countryCode: countryFromCode.iso2,
+					},
+					this.taxIdValidator,
+				),
+				description: props.description
+					? CompanyDescription.create(props.description)
+					: undefined,
+				businessArea:
+					CompanyBusinessArea[props.businessArea.toUpperCase()],
+				personType: PersonType[props.personType.toUpperCase()],
+				status: props.status
+					? CompanyStatus[props.status.toUpperCase()]
+					: undefined,
+				countryId: Number(countryFromCode.id.value),
+			})
 
 			const result = await this.companyRepository.update(companyToUpdate)
 			return right(result)

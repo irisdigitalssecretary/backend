@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { PersonType } from '@/core/shared/domain/constants/company/person-type.enum'
 import { CompanyStatus } from '@/core/shared/domain/constants/company/company-status.enum'
 import { TaxIdIso2Enum } from '@/core/shared/domain/constants/taxId/tax-id-iso2.enum'
+import { CompanyBusinessArea } from '@/core/shared/domain/constants/company/company-business-area.enum'
 
 export const updateCompanySchema = z.object({
 	name: z
@@ -56,10 +57,7 @@ export const updateCompanySchema = z.object({
 			'A descrição da empresa deve possuir no máximo 255 caracteres.',
 		)
 		.optional(),
-	businessArea: z
-		.string()
-		.min(1, 'Área de negócios é obrigatória.')
-		.transform((value) => value?.trim()),
+	businessArea: z.enum(CompanyBusinessArea, 'Área de negócios inválida.'),
 	personType: z.enum(PersonType, 'Tipo de pessoa inválido.'),
 	status: z.enum(CompanyStatus, 'Status inválido').optional(),
 	countryCode: z

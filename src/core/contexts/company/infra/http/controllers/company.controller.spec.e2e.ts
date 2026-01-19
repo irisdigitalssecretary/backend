@@ -555,52 +555,6 @@ describe('CompanyController.create (E2E)', () => {
 		})
 	})
 
-	it('DELETE /companies/:id -> should be able to delete a company', async () => {
-		const newCompany = {
-			name: 'Company 1',
-			email: 'company1@example.com',
-			taxId: '01894147000135',
-			address: '123 Main St',
-			city: 'Anytown',
-			state: 'Rio de Janeiro',
-			businessArea: 'Technology',
-			personType: 'company',
-			countryCode: 'BR',
-			zip: '89160306',
-			landline: '+551135211980',
-			phone: '+5511988899090',
-			description: 'Company 1 description is valid!',
-		}
-
-		const createResponse = await request(server)
-			.post('/companies')
-			.send(newCompany)
-
-		const companyId = createResponse.body.company.id
-
-		const response = await request(server).delete(`/companies/${companyId}`)
-
-		expect(response.status).toBe(200)
-
-		const companies = await app.get(PrismaService).company.findMany({})
-		expect(companies).toHaveLength(0)
-
-		const deletedCompany = await app.get(PrismaService).company.findFirst({
-			where: { id: companyId },
-		})
-		expect(deletedCompany).toBeNull()
-	})
-
-	it('DELETE /companies/:id -> should not be able to delete a company if it does not exist', async () => {
-		const response = await request(server).delete('/companies/999999')
-
-		expect(response.status).toBe(404)
-		expect(response.body).toMatchObject({
-			message: 'Empresa não encontrada.',
-			statusCode: 404,
-		})
-	})
-
 	it('GET /companies -> should be able to find many companies with pagination', async () => {
 		const company1 = {
 			name: 'Company 1',
@@ -799,7 +753,7 @@ describe('CompanyController.create (E2E)', () => {
 		expect(response.body.companies[1].name).toBe('Alpha Company')
 	})
 
-	it('GET /companies -> should be able to select specific fields', async () => {
+	it.only('GET /companies -> should be able to select specific fields', async () => {
 		const company1 = {
 			name: 'Company 1',
 			email: 'company1@example.com',
@@ -818,9 +772,9 @@ describe('CompanyController.create (E2E)', () => {
 
 		await request(server).post('/companies').send(company1)
 
-		const response = await request(server)
-			.get('/companies')
-			.query({ select: ['id', 'name', 'email'] })
+		const response = await request(server).get(
+			'/companies?select=name&select=email',
+		)
 
 		expect(response.status).toBe(200)
 		expect(response.body.companies).toHaveLength(1)

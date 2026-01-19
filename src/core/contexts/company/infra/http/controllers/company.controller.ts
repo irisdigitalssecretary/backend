@@ -1,7 +1,6 @@
 import {
 	Body,
 	Controller,
-	Delete,
 	Get,
 	HttpException,
 	Param,
@@ -196,18 +195,6 @@ export class CompanyController {
 
 		return {
 			company: CompanyViewModel.toHTTP(result.value),
-		}
-	}
-
-	@Delete(':id')
-	async delete(@Param('id', ParseIntPipe) id: number) {
-		const result = await this.deleteCompanyByIdUseCase.execute(id)
-
-		if (result.isLeft()) {
-			throw new HttpException(
-				result.value.message,
-				result.value.statusCode,
-			)
 		}
 	}
 

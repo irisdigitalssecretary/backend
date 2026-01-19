@@ -3,6 +3,7 @@ import path from 'node:path'
 
 export default defineConfig({
 	test: {
+		fileParallelism: false,
 		globals: true,
 		include: ['**/*.spec.ts'],
 	},
