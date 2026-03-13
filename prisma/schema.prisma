@@ -30,6 +30,7 @@ model User {
     createdAt     DateTime      @default(now())
     updatedAt     DateTime      @updatedAt
     companyId     Int
+    isMaster      Boolean       @default(false)
 
     company Company @relation(fields: [companyId], references: [id])
 }

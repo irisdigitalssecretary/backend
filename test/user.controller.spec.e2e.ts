@@ -24,7 +24,7 @@ async function createTestUser(
 	const newUser = { ...defaultUser, ...overrides }
 	const response = await request(server)
 		.post('/users')
-		.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+		.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 		.set('x-company-id', String(companyId))
 		.send(newUser)
 	return response.body.user as Record<string, any>
@@ -92,7 +92,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.post('/users')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newUser)
 
@@ -135,7 +135,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.post('/users')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newUser)
 		expect(response.status).toBe(409)
@@ -170,7 +170,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.put(`/users/${createdUser?.id}`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -201,7 +201,7 @@ describe('UserController (E2E)', () => {
 
 		await request(server)
 			.post('/users')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send({
 				name: 'John Doe',
@@ -220,7 +220,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.put(`/users/${createdUser.id}`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -252,7 +252,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.put(`/users/1123`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 		expect(response.status).toBe(404)
@@ -284,7 +284,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.put(`/users/${createdUser.id}`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -314,7 +314,7 @@ describe('UserController (E2E)', () => {
 
 		await request(server)
 			.post('/users')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newUser)
 		const user = await app.get(PrismaService).user.findFirst({})
@@ -330,7 +330,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.put(`/users/${user?.id}`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -368,7 +368,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.put(`/users/${createdUser.id}`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -400,7 +400,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.patch(`/users/${createdUser?.id}/session-status`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -418,7 +418,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.patch(`/users/123/session-status`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -450,7 +450,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.patch(`/users/${createdUser.id}/status`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -468,7 +468,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.patch(`/users/123/status`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send(newData)
 
@@ -496,7 +496,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.delete(`/users/${createdUser.id}`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 
 		expect(response.status).toBe(200)
@@ -505,7 +505,7 @@ describe('UserController (E2E)', () => {
 	it('DELETE /users/:id -> should not be able to delete a user if the user does not exist', async () => {
 		const response = await request(server)
 			.delete(`/users/123`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 
 		expect(response.status).toBe(404)
@@ -532,7 +532,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.get(`/users/${createdUser.uuid}`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 
 		expect(response.status).toBe(200)
@@ -555,7 +555,7 @@ describe('UserController (E2E)', () => {
 	it('GET /users/:uuid -> should not be able to get a user by uuid if the user does not exist', async () => {
 		const response = await request(server)
 			.get(`/users/123`)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 
 		expect(response.status).toBe(404)
@@ -571,7 +571,7 @@ describe('UserController (E2E)', () => {
 		}
 		const response = await request(server)
 			.get('/users')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.query({ pagination: { limit: 15, page: 1 } })
 		expect(response.status).toBe(200)
@@ -595,7 +595,7 @@ describe('UserController (E2E)', () => {
 		}
 		const response = await request(server)
 			.get('/users?pagination[limit]=5&pagination[page]=1')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 		expect(response.status).toBe(200)
 		expect(response.body.users).toHaveLength(5)
@@ -605,7 +605,7 @@ describe('UserController (E2E)', () => {
 		for (let i = 1; i <= 80; i++) {
 			await request(server)
 				.post('/users')
-				.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 				.set('x-company-id', company.id)
 				.send({
 					name: `User ${i}`,
@@ -616,7 +616,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.get('/users?pagination[limit]=100')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 
 		expect(response.status).toBe(200)
@@ -627,7 +627,7 @@ describe('UserController (E2E)', () => {
 		for (let i = 1; i <= 10; i++) {
 			await request(server)
 				.post('/users')
-				.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 				.set('x-company-id', company.id)
 				.send({
 					name: `Alice User ${i}`,
@@ -639,7 +639,7 @@ describe('UserController (E2E)', () => {
 		for (let i = 1; i <= 5; i++) {
 			await request(server)
 				.post('/users')
-				.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 				.set('x-company-id', company.id)
 				.send({
 					name: `Bob User ${i}`,
@@ -652,7 +652,7 @@ describe('UserController (E2E)', () => {
 			.get(
 				'/users?filters[name]=Alice&pagination[limit]=5&pagination[page]=1&orderBy[name]=asc&select=name&select=email',
 			)
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 
 		expect(response.status).toBe(200)
@@ -673,7 +673,7 @@ describe('UserController (E2E)', () => {
 	it('GET /users -> should return empty array when no users match filters', async () => {
 		await request(server)
 			.post('/users')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 			.send({
 				name: 'John Doe Empty Test',
@@ -683,7 +683,7 @@ describe('UserController (E2E)', () => {
 
 		const response = await request(server)
 			.get('/users?filters[name]=NonExistentUserXYZ12345')
-			.set('Authorization', `Bearer ${env.MASTER_KEY}`)
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
 			.set('x-company-id', company.id)
 
 		expect(response.status).toBe(200)

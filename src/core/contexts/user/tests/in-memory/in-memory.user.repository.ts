@@ -156,7 +156,7 @@ export class InMemoryUserRepository implements UserRepository {
 			users = users.slice(
 				props.pagination?.after,
 				(props.pagination?.after || 0) +
-					(props.pagination?.limit || 15),
+				(props.pagination?.limit || 15),
 			)
 
 			if (select && select.length > 0) {

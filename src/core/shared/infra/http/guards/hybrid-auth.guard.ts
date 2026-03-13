@@ -15,7 +15,7 @@ export const UNAUTHORIZED_MESSAGE = 'Unauthorized access'
 
 @Injectable()
 export class HybridAuthGuard implements CanActivate {
-	constructor(private reflector: Reflector) {}
+	constructor(private reflector: Reflector) { }
 
 	canActivate(ctx: ExecutionContext): boolean {
 		const request = ctx.switchToHttp().getRequest()
@@ -30,7 +30,7 @@ export class HybridAuthGuard implements CanActivate {
 
 		if (!secretOrJwt) throw new UnauthorizedException(UNAUTHORIZED_MESSAGE)
 
-		const MASTER_SECRET = env.MASTER_KEY
+		const MASTER_SECRET = env.MASTER_LOCAL_TESTS_KEY
 
 		if (MASTER_SECRET === secretOrJwt) {
 			const companyId = request.headers['x-company-id'] as number
@@ -48,9 +48,9 @@ export class HybridAuthGuard implements CanActivate {
 			return true
 		}
 
-		const allowJwt = authConfig?.allowJwt ?? true
+		const onlyMastersCanAccess = authConfig?.onlyMastersCanAccess ?? false
 
-		if (!allowJwt) {
+		if (onlyMastersCanAccess) { // && !isMaster
 			throw new UnauthorizedException(UNAUTHORIZED_MESSAGE)
 		}
 

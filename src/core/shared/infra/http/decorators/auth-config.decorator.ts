@@ -1,7 +1,7 @@
 import { SetMetadata } from '@nestjs/common'
 
 export interface AuthConfig {
-	allowJwt: boolean
+	onlyMastersCanAccess: boolean
 }
 
 export const AUTH_CONFIG_KEY = 'authConfig'

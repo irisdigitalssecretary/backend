@@ -9,6 +9,7 @@ import {
 	Post,
 	Put,
 	Query,
+	UseGuards,
 } from '@nestjs/common'
 import { CreateCompanyUseCase } from '../../../application/use-cases/create-company.use-case'
 import { ZodValidationPipe } from '@/core/shared/infra/http/pipes/zod-validation-pipes'
@@ -39,6 +40,8 @@ import {
 	type FindManyCompaniesQuery,
 	findManyCompaniesSchema,
 } from '../dtos/find-many-companies.dto'
+import { HybridAuthGuard } from '@/core/shared/infra/http/guards/hybrid-auth.guard'
+import { AuthOptions } from '@/core/shared/infra/http/decorators/auth-config.decorator'
 
 @Controller('companies')
 export class CompanyController {
@@ -49,7 +52,7 @@ export class CompanyController {
 		private readonly findCompanyByUuidUseCase: FindCompanyByUuidUseCase,
 		private readonly deleteCompanyByIdUseCase: DeleteCompanyByIdUseCase,
 		private readonly findManyCompaniesByOffsetPaginationUseCase: FindManyCompaniesByOffsetPaginationUseCase,
-	) {}
+	) { }
 
 	@Post()
 	async create(
@@ -182,6 +185,8 @@ export class CompanyController {
 		}
 	}
 
+	@UseGuards(HybridAuthGuard)
+	@AuthOptions({ onlyMastersCanAccess: true })
 	@Get(':uuid')
 	async findByUuid(@Param('uuid') uuid: string) {
 		const result = await this.findCompanyByUuidUseCase.execute({ uuid })
@@ -198,6 +203,8 @@ export class CompanyController {
 		}
 	}
 
+	@UseGuards(HybridAuthGuard)
+	@AuthOptions({ onlyMastersCanAccess: true })
 	@Get()
 	async findMany(
 		@Query(new ZodValidationPipe(findManyCompaniesSchema))

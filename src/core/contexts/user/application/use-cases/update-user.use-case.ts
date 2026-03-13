@@ -39,7 +39,7 @@ export class UpdateUserUseCase {
 	constructor(
 		private readonly userRepository: UserRepository,
 		private readonly hasher: Hasher,
-	) {}
+	) { }
 
 	public async execute(
 		props: UpdateUserUseCaseRequest,
@@ -65,14 +65,15 @@ export class UpdateUserUseCase {
 		}
 
 		try {
-			userToUpdate.props = {
-				...userToUpdate.props,
+			const userProps = {
 				email: Email.create(props.email),
 				name: props.name,
 				sessionStatus: props.sessionStatus,
 				status: props.status,
 				phone: props?.phone ? Phone.create(props.phone) : undefined,
 			}
+
+			await userToUpdate.update(userProps)
 
 			if (props.password) {
 				await userToUpdate.updatePassword({

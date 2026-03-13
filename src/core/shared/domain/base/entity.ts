@@ -4,7 +4,7 @@ export abstract class Entity<T> {
 	constructor(
 		protected _props: T,
 		public readonly id: UniqueEntityId,
-	) {}
+	) { }
 
 	public equals(object?: Entity<T>): boolean {
 		if (!object) return false
