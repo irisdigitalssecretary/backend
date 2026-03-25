@@ -99,7 +99,7 @@ export class UpdateCompanyUseCase {
 
 		if (
 			companyTaxIdAlreadyExists &&
-			companyTaxIdAlreadyExists.id !== companyToUpdate.id
+			companyTaxIdAlreadyExists.props.id !== companyToUpdate.props.id
 		) {
 			return left(new CompanyTaxIdAlreadyExistsError())
 		}

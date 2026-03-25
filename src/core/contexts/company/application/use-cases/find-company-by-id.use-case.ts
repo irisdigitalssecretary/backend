@@ -4,23 +4,23 @@ import { CompanyNotFoundError } from '../../../../shared/application/errors/comp
 import { Either, left, right } from '@/core/shared/domain/base/either'
 import { Injectable } from '@nestjs/common'
 
-interface FindCompanyByUuidUseCaseRequest {
-	uuid: string
+interface FindCompanyByIdUseCaseRequest {
+	id: number
 }
 
-type FindCompanyByUuidUseCaseResponse = Either<
+type FindCompanyByIdUseCaseResponse = Either<
 	CompanyNotFoundError,
 	CompanyEntity
 >
 
 @Injectable()
-export class FindCompanyByUuidUseCase {
-	constructor(private readonly companyRepository: CompanyRepository) {}
+export class FindCompanyByIdUseCase {
+	constructor(private readonly companyRepository: CompanyRepository) { }
 
 	public async execute(
-		props: FindCompanyByUuidUseCaseRequest,
-	): Promise<FindCompanyByUuidUseCaseResponse> {
-		const company = await this.companyRepository.findByUuid(props.uuid)
+		props: FindCompanyByIdUseCaseRequest,
+	): Promise<FindCompanyByIdUseCaseResponse> {
+		const company = await this.companyRepository.findById(props.id)
 
 		if (!company) {
 			return left(new CompanyNotFoundError())

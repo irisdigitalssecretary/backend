@@ -3,23 +3,23 @@ import { InMemoryCompanyRepository } from '../../tests/in-memory/in-memory.compa
 import { CompanyEntity } from '../../domain/entities/company.entity'
 import { CompanyNotFoundError } from '../../../../shared/application/errors/company-not-found'
 import { CompanyFactory } from '../../domain/factories/make-company-entity'
-import { FindCompanyByUuidUseCase } from './find-company-by-uuid.use-case'
+import { FindCompanyByIdUseCase } from './find-company-by-id.use-case'
 import { PersonType } from '@/core/shared/domain/constants/company/person-type.enum'
 
-describe('FindCompanyByUuidUseCase', () => {
+describe('FindCompanyByIdUseCase', () => {
 	let companyRepository: CompanyRepository
-	let findCompanyByUuidUseCase: FindCompanyByUuidUseCase
+	let findCompanyByIdUseCase: FindCompanyByIdUseCase
 
 	beforeEach(() => {
 		companyRepository = new InMemoryCompanyRepository()
-		findCompanyByUuidUseCase = new FindCompanyByUuidUseCase(
+		findCompanyByIdUseCase = new FindCompanyByIdUseCase(
 			companyRepository,
 		)
 	})
 
 	it('should not be able to find a company if it does not exist', async () => {
-		const result = await findCompanyByUuidUseCase.execute({
-			uuid: 'non-existent-uuid',
+		const result = await findCompanyByIdUseCase.execute({
+			id: 1,
 		})
 
 		expect(result.isLeft()).toBe(true)
@@ -31,10 +31,10 @@ describe('FindCompanyByUuidUseCase', () => {
 		expect(companyRepository.companies.length).toBe(0)
 	})
 
-	it('should be able to find a company by uuid', async () => {
+	it('should be able to find a company by id', async () => {
 		const uuid = '123e4567-e89b-12d3-a456-426614174000'
 
-		await companyRepository.create(
+		const createdCompany = await companyRepository.create(
 			CompanyFactory.reconstitute({
 				uuid,
 				name: 'Tech Company Inc',
@@ -53,7 +53,7 @@ describe('FindCompanyByUuidUseCase', () => {
 
 		expect(companyRepository.companies.length).toBe(1)
 
-		const result = await findCompanyByUuidUseCase.execute({ uuid })
+		const result = await findCompanyByIdUseCase.execute({ id: createdCompany.props.id! })
 
 		expect(result.isRight()).toBe(true)
 

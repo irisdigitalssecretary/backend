@@ -28,8 +28,7 @@ import {
 	updateCompanyStatusSchema,
 } from '../dtos/update-company-status.dto'
 import { UpdateCompanyStatusUseCase } from '../../../application/use-cases/update-company-status.use-case'
-import { FindCompanyByUuidUseCase } from '../../../application/use-cases/find-company-by-uuid.use-case'
-import { DeleteCompanyByIdUseCase } from '../../../application/use-cases/delete-company-by-id.use-case'
+import { FindCompanyByIdUseCase } from '../../../application/use-cases/find-company-by-id.use-case'
 import {
 	CompanyFields,
 	CompanySelectableFields,
@@ -42,18 +41,122 @@ import {
 } from '../dtos/find-many-companies.dto'
 import { HybridAuthGuard } from '@/core/shared/infra/http/guards/hybrid-auth.guard'
 import { AuthOptions } from '@/core/shared/infra/http/decorators/auth-config.decorator'
+import { User, type UserContext } from '@/core/shared/infra/http/decorators/user.decorator'
 
+@UseGuards(HybridAuthGuard)
 @Controller('companies')
 export class CompanyController {
 	constructor(
 		private readonly createCompanyUseCase: CreateCompanyUseCase,
 		private readonly updateCompanyUseCase: UpdateCompanyUseCase,
 		private readonly updateCompanyStatusUseCase: UpdateCompanyStatusUseCase,
-		private readonly findCompanyByUuidUseCase: FindCompanyByUuidUseCase,
-		private readonly deleteCompanyByIdUseCase: DeleteCompanyByIdUseCase,
+		private readonly findCompanyByIdUseCase: FindCompanyByIdUseCase,
 		private readonly findManyCompaniesByOffsetPaginationUseCase: FindManyCompaniesByOffsetPaginationUseCase,
 	) { }
 
+	@Put()
+	async update(
+		@Body(new ZodValidationPipe(updateCompanySchema))
+		body: UpdateCompanyBody,
+		@User() user: UserContext
+	) {
+		const { companyId } = user
+		const {
+			name,
+			email,
+			landline,
+			phone,
+			taxId,
+			address,
+			zip,
+			city,
+			state,
+			description,
+			businessArea,
+			personType,
+			status,
+			countryCode,
+		} = body
+
+		const result = await this.updateCompanyUseCase.execute(
+			{
+				name,
+				email,
+				landline,
+				phone,
+				taxId,
+				address,
+				zip,
+				city,
+				state,
+				description,
+				businessArea,
+				personType,
+				status,
+				countryCode,
+			},
+			companyId,
+		)
+
+		if (result.isLeft()) {
+			throw new HttpException(
+				result.value.message,
+				result.value.statusCode,
+			)
+		}
+
+		return {
+			company: CompanyViewModel.toHTTP(result.value),
+		}
+	}
+
+	@Patch('/status')
+	async updateStatus(
+		@Body(new ZodValidationPipe(updateCompanyStatusSchema))
+		body: UpdateCompanyStatusBody,
+		@User() user: UserContext
+	) {
+		const { status } = body
+		const { companyId } = user
+
+		const result = await this.updateCompanyStatusUseCase.execute({
+			id: companyId,
+			status,
+		})
+
+		if (result.isLeft()) {
+			throw new HttpException(
+				result.value.message,
+				result.value.statusCode,
+			)
+		}
+
+		return {
+			company: CompanyViewModel.toHTTP(result.value),
+		}
+	}
+
+	@Get('/my-company')
+	async findByUserCompanyId(@User() user: UserContext) {
+		const { companyId } = user
+		const result = await this.findCompanyByIdUseCase.execute({ id: companyId })
+
+		if (result.isLeft()) {
+			throw new HttpException(
+				result.value.message,
+				result.value.statusCode,
+			)
+		}
+
+		return {
+			company: CompanyViewModel.toHTTP(result.value),
+		}
+	}
+
+	/**
+	 * SOMENTE MASTERS / PAINEL ADMINISTRATIVO
+	 */
+	@AuthOptions({ onlyMastersCanAccess: true })
 	@Post()
 	async create(
 		@Body(new ZodValidationPipe(createCompanySchema))
@@ -105,91 +208,10 @@ export class CompanyController {
 		}
 	}
 
-	@Put(':id')
-	async update(
-		@Param('id', ParseIntPipe) id: number,
-		@Body(new ZodValidationPipe(updateCompanySchema))
-		body: UpdateCompanyBody,
-	) {
-		const {
-			name,
-			email,
-			landline,
-			phone,
-			taxId,
-			address,
-			zip,
-			city,
-			state,
-			description,
-			businessArea,
-			personType,
-			status,
-			countryCode,
-		} = body
-
-		const result = await this.updateCompanyUseCase.execute(
-			{
-				name,
-				email,
-				landline,
-				phone,
-				taxId,
-				address,
-				zip,
-				city,
-				state,
-				description,
-				businessArea,
-				personType,
-				status,
-				countryCode,
-			},
-			id,
-		)
-
-		if (result.isLeft()) {
-			throw new HttpException(
-				result.value.message,
-				result.value.statusCode,
-			)
-		}
-
-		return {
-			company: CompanyViewModel.toHTTP(result.value),
-		}
-	}
-
-	@Patch(':id/status')
-	async updateStatus(
-		@Param('id', ParseIntPipe) id: number,
-		@Body(new ZodValidationPipe(updateCompanyStatusSchema))
-		body: UpdateCompanyStatusBody,
-	) {
-		const { status } = body
-
-		const result = await this.updateCompanyStatusUseCase.execute({
-			id,
-			status,
-		})
-
-		if (result.isLeft()) {
-			throw new HttpException(
-				result.value.message,
-				result.value.statusCode,
-			)
-		}
-
-		return {
-			company: CompanyViewModel.toHTTP(result.value),
-		}
-	}
-
-	@UseGuards(HybridAuthGuard)
 	@AuthOptions({ onlyMastersCanAccess: true })
-	@Get(':uuid')
-	async findByUuid(@Param('uuid') uuid: string) {
-		const result = await this.findCompanyByUuidUseCase.execute({ uuid })
+	@Get(':id')
+	async findById(@Param('id', ParseIntPipe) id: number) {
+		const result = await this.findCompanyByIdUseCase.execute({ id })
 
 		if (result.isLeft()) {
 			throw new HttpException(
@@ -203,7 +225,6 @@ export class CompanyController {
 		}
 	}
 
-	@UseGuards(HybridAuthGuard)
 	@AuthOptions({ onlyMastersCanAccess: true })
 	@Get()
 	async findMany(

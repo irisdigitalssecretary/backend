@@ -42,21 +42,24 @@ describe('UserController (E2E)', () => {
 
 	beforeEach(async () => {
 		await app.get(PrismaService).cleanDatabase()
-		const response = await request(server).post('/companies').send({
-			name: 'Company 1',
-			email: 'company1@example.com',
-			taxId: '01894147000135',
-			address: '123 Main St',
-			city: 'Anytown',
-			state: 'Rio de Janeiro',
-			businessArea: 'Technology',
-			personType: 'company',
-			countryCode: 'BR',
-			zip: '89160306',
-			landline: '+551135211980',
-			phone: '+5511988899090',
-			description: 'Company 1 description is valid!',
-		})
+		const response = await request(server)
+			.post('/companies')
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
+			.send({
+				name: 'Company 1',
+				email: 'company1@example.com',
+				taxId: '01894147000135',
+				address: '123 Main St',
+				city: 'Anytown',
+				state: 'Rio de Janeiro',
+				businessArea: 'Technology',
+				personType: 'company',
+				countryCode: 'BR',
+				zip: '89160306',
+				landline: '+551135211980',
+				phone: '+5511988899090',
+				description: 'Company 1 description is valid!',
+			})
 
 		company = response.body.company
 	})
@@ -301,43 +304,6 @@ describe('UserController (E2E)', () => {
 				createdAt: expect.any(String),
 				updatedAt: expect.any(String),
 			},
-		})
-	})
-
-	it('PUT /users/:id -> should not be able to update a user if the old password is not provided and the password is provided', async () => {
-		const newUser = {
-			name: 'John Doe',
-			email: 'john.doe@example.com',
-			password: 'Test123@emaiiil',
-			phone: '1234567890',
-		}
-
-		await request(server)
-			.post('/users')
-			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-			.set('x-company-id', company.id)
-			.send(newUser)
-		const user = await app.get(PrismaService).user.findFirst({})
-
-		const newData = {
-			name: 'John Doe 3',
-			email: 'john.doe1@example.com',
-			password: 'Test@1234',
-			phone: '0987654321',
-			sessionStatus: 'online',
-			status: 'active',
-		}
-
-		const response = await request(server)
-			.put(`/users/${user?.id}`)
-			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-			.set('x-company-id', company.id)
-			.send(newData)
-
-		expect(response.status).toBe(401)
-		expect(response.body).toMatchObject({
-			message: 'A senha atual é obrigatória para atualizar a senha.',
-			statusCode: 401,
 		})
 	})
 

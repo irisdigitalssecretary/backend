@@ -3,8 +3,7 @@ import { CompanyController } from './infra/http/controllers/company.controller'
 import { CreateCompanyUseCase } from './application/use-cases/create-company.use-case'
 import { UpdateCompanyUseCase } from './application/use-cases/update-company.use-case'
 import { UpdateCompanyStatusUseCase } from './application/use-cases/update-company-status.use-case'
-import { DeleteCompanyByIdUseCase } from './application/use-cases/delete-company-by-id.use-case'
-import { FindCompanyByUuidUseCase } from './application/use-cases/find-company-by-uuid.use-case'
+import { FindCompanyByIdUseCase } from './application/use-cases/find-company-by-id.use-case'
 import { FindManyCompaniesByOffsetPaginationUseCase } from './application/use-cases/find-many-companies-by-offset-pagination'
 import { CompanyRepository } from './domain/repositories/company.repository'
 import { PrismaCompanyRepository } from './infra/database/prisma/prisma-company.repository'
@@ -21,8 +20,7 @@ import { PrismaCountryRepository } from '../country/infra/database/prisma/prisma
 		CreateCompanyUseCase,
 		UpdateCompanyUseCase,
 		UpdateCompanyStatusUseCase,
-		DeleteCompanyByIdUseCase,
-		FindCompanyByUuidUseCase,
+		FindCompanyByIdUseCase,
 		FindManyCompaniesByOffsetPaginationUseCase,
 		{
 			provide: CompanyRepository,
@@ -42,4 +40,4 @@ import { PrismaCountryRepository } from '../country/infra/database/prisma/prisma
 		},
 	],
 })
-export class CompanyModule {}
+export class CompanyModule { }

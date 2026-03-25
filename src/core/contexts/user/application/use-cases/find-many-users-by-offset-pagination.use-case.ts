@@ -20,7 +20,7 @@ type FindManyUsersByOffsetPaginationUseCaseResponse = Either<null, UserEntity[]>
 
 @Injectable()
 export class FindManyUsersByOffsetPaginationUseCase {
-	constructor(private readonly userRepository: UserRepository) {}
+	constructor(private readonly userRepository: UserRepository) { }
 
 	public async execute(
 		props: FindManyUsersByOffsetPaginationUseCaseRequest,

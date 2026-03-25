@@ -11,7 +11,8 @@ import {
 	AuthConfig,
 } from '../decorators/auth-config.decorator'
 
-export const UNAUTHORIZED_MESSAGE = 'Unauthorized access'
+const UNAUTHORIZED_MESSAGE = 'Unauthorized access'
+const MASTER_COMPANY_ID = 0
 
 @Injectable()
 export class HybridAuthGuard implements CanActivate {
@@ -32,27 +33,27 @@ export class HybridAuthGuard implements CanActivate {
 
 		const MASTER_SECRET = env.MASTER_LOCAL_TESTS_KEY
 
-		if (MASTER_SECRET === secretOrJwt) {
-			const companyId = request.headers['x-company-id'] as number
-
-			if (!companyId)
-				throw new UnauthorizedException(UNAUTHORIZED_MESSAGE)
+		if (MASTER_SECRET && (MASTER_SECRET === secretOrJwt)) {
+			const companyId = request.headers['x-company-id'] as number || 1
 
 			request.user = {
 				id: 'system-master',
 				roles: ['MASTER'],
 				isMaster: true,
-				companyId: companyId,
+				companyId: Number(companyId),
 			}
 
 			return true
 		}
 
-		const onlyMastersCanAccess = authConfig?.onlyMastersCanAccess ?? false
+		// const payload = jwt.verify(secretOrJwt, env.JWT_SECRET)
+		// const { user } = payload
 
-		if (onlyMastersCanAccess) { // && !isMaster
-			throw new UnauthorizedException(UNAUTHORIZED_MESSAGE)
-		}
+		// const onlyMastersCanAccess = authConfig?.onlyMastersCanAccess ?? false
+
+		// if (onlyMastersCanAccess && !user.isMaster) { // && !isMaster
+		// 	throw new UnauthorizedException(UNAUTHORIZED_MESSAGE)
+		// }
 
 		return true
 	}
