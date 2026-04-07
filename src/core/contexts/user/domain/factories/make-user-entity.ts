@@ -12,6 +12,7 @@ interface MakeUserEntityProps {
 	uuid?: string
 	name: string
 	email: string
+	isMaster?: boolean
 	password?: string
 	phone?: string
 	companyId: number

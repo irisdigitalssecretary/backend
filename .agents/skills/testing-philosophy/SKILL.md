@@ -32,5 +32,15 @@ Unit tests focus on the **Domain** and **Application** layers in isolation, ensu
 
 ---
 
+## 3. E2E Authentication & User Roles (Strict Rules)
+
+- **The Master Local Tests Key:** Authentication via `Bearer ${env.MASTER_LOCAL_TESTS_KEY}` MUST ONLY be used when **creating a company** or **creating the very first user (onboarding)**. This is a temporary measure because full onboarding endpoints are not built yet and the platform needs to be fully working before designing them. NEVER use this key for any other standard requests.
+- **Mandatory Authentication Tests:** EVERY, REPEAT: EVERY E2E test file MUST contain at least one test validating the user authentication (e.g., verifying without a token returns a `401 Unauthorized`).
+- **Master vs Normal Routes Restrictions:**
+  - If the endpoint has `@AuthOptions({ onlyMastersCanAccess: true })`: You MUST test the route using a **master user** (`masterToken`), AND include at least one validation proving that a **normal user** (`normalToken`) cannot access it.
+  - If the endpoint does NOT have `onlyMastersCanAccess` set: You MUST test its functionalities using **ONLY a normal user** (`normalToken`). Do NOT use a master user to test standard endpoints.
+
+---
+
 > [!IMPORTANT]
 > **The Golden Rule:** If an error logic requires a call to `repository.find...`, any DB-dependent method, or involves Authentication/RBAC guards, it strictly requires an E2E test case.

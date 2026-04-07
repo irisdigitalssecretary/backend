@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 import { env } from '@shared/infra/config/env-validation'
 
@@ -11,7 +12,7 @@ export class PrismaService extends PrismaClient {
 			log: ['production', 'test'].includes(env.APP_ENV)
 				? ['warn', 'error']
 				: ['query', 'info', 'warn', 'error'],
-			datasourceUrl: env.DATABASE_URL,
+			adapter: new PrismaPg({ connectionString: env.DATABASE_URL })
 		})
 	}
 

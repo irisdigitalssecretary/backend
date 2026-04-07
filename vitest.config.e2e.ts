@@ -4,6 +4,9 @@ import react from '@vitejs/plugin-react-swc'
 
 export default defineConfig({
 	test: {
+		sequence: {
+			concurrent: false,
+		},
 		fileParallelism: false,
 		globals: true,
 		globalSetup: path.resolve(__dirname, './test/setup.e2e.ts'),

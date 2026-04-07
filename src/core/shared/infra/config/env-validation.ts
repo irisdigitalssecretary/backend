@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { config } from 'dotenv'
 
-config({ path: '.env.test' })
+config()
 
 export const envSchema = z.object({
 	// Aplicação
@@ -29,10 +29,14 @@ export const envSchema = z.object({
 	REDIS_PASSWORD: z.string(),
 
 	//App
-	APP_ENV: z.string().default('development'),
+	APP_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
 	//Secrets
 	MASTER_LOCAL_TESTS_KEY: z.string(),
+	JWT_SECRET: z.string(),
+
+	//Frontend
+	FRONTEND_URL: z.string().default('http://localhost:5050'),
 })
 
 export const env = envSchema.parse(process.env)

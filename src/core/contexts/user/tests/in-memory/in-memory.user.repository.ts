@@ -177,14 +177,6 @@ export class InMemoryUserRepository implements UserRepository {
 						},
 						user.uuid,
 					)
-
-					return UserEntity.create(
-						{
-							...selectedFields,
-							email: user.props.email,
-						},
-						user.id,
-					)
 				})
 			}
 

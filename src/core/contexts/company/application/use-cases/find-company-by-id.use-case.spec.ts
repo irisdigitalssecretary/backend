@@ -5,16 +5,24 @@ import { CompanyNotFoundError } from '../../../../shared/application/errors/comp
 import { CompanyFactory } from '../../domain/factories/make-company-entity'
 import { FindCompanyByIdUseCase } from './find-company-by-id.use-case'
 import { PersonType } from '@/core/shared/domain/constants/company/person-type.enum'
+import { TaxIdValidator } from '@/core/shared/domain/infra/services/validators/tax-id-validator'
+import { ZipCodeValidator } from '@/core/shared/domain/infra/services/validators/zip-code-validator'
+import { TaxIdValidatorService } from '@/core/shared/infra/services/validators/tax-id-validator.service'
+import { ZipCodeValidatorService } from '@/core/shared/infra/services/validators/zip-code-validator.service'
 
 describe('FindCompanyByIdUseCase', () => {
 	let companyRepository: CompanyRepository
 	let findCompanyByIdUseCase: FindCompanyByIdUseCase
+	let taxIdValidator: TaxIdValidator
+	let zipCodeValidator: ZipCodeValidator
 
 	beforeEach(() => {
 		companyRepository = new InMemoryCompanyRepository()
 		findCompanyByIdUseCase = new FindCompanyByIdUseCase(
 			companyRepository,
 		)
+		taxIdValidator = new TaxIdValidatorService()
+		zipCodeValidator = new ZipCodeValidatorService()
 	})
 
 	it('should not be able to find a company if it does not exist', async () => {
@@ -35,7 +43,7 @@ describe('FindCompanyByIdUseCase', () => {
 		const uuid = '123e4567-e89b-12d3-a456-426614174000'
 
 		const createdCompany = await companyRepository.create(
-			CompanyFactory.reconstitute({
+			CompanyFactory.create({
 				uuid,
 				name: 'Tech Company Inc',
 				email: 'contact@techcompany.com',
@@ -48,7 +56,13 @@ describe('FindCompanyByIdUseCase', () => {
 				taxId: '01894147000135',
 				businessArea: 'TECHNOLOGY',
 				personType: PersonType.COMPANY,
-			}),
+			},
+				{
+					taxIdValidator,
+					zipCodeValidator,
+					countryCode: 'BR',
+				}
+			)
 		)
 
 		expect(companyRepository.companies.length).toBe(1)

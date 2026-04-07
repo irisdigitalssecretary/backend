@@ -65,12 +65,15 @@ export default function setup() {
 
 	execSync('docker compose down')
 
+	console.log('🏗️  Subindo ambiente de testes...')
+
 	execSync(
-		'docker compose -f docker-compose.test.yml --env-file ./.env.test up -d',
+		'docker compose -f docker-compose.test.yml --env-file ./.env.test up -d --wait',
 	)
 
-	execSync('npx prisma migrate reset --force')
-	execSync('npm run migrate:test')
+	execSync('node -e "setTimeout(() => {}, 2000)"')
+	console.log('🏗️  Resetando banco de dados...')
+	execSync('npx prisma db push --force-reset')
 	removeTestsSeeds()
 	copySeedsToTestDir()
 	console.log('🔄 Executando seeds de teste...')

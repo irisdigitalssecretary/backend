@@ -8,10 +8,12 @@ describe('CompanyController (E2E)', () => {
 	let app: INestApplication
 	let server: any
 	let company: Record<string, any>
+	let masterToken: string
+	let normalToken: string
 
 	const companyData = {
 		name: 'Company 1',
-		email: 'company1@example.com',
+		email: `company${Math.random()}@example.com`,
 		taxId: '01894147000135',
 		address: '123 Main St',
 		city: 'Anytown',
@@ -31,7 +33,8 @@ describe('CompanyController (E2E)', () => {
 	})
 
 	beforeEach(async () => {
-		await app.get(PrismaService).cleanDatabase()
+		const prisma = app.get(PrismaService)
+		await prisma.cleanDatabase()
 
 		const response = await request(server)
 			.post('/companies')
@@ -39,6 +42,59 @@ describe('CompanyController (E2E)', () => {
 			.send(companyData)
 
 		company = response.body.company
+
+		const userCredentials = {
+			name: 'Master User',
+			email: 'master@example.com',
+			password: 'Test123@password',
+			phone: '+5511999999999',
+		}
+
+		const userResponse = await request(server)
+			.post('/users')
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
+			.set('x-company-id', String(company.id))
+			.send(userCredentials)
+
+		const createdUserId = userResponse.body.user.id
+
+		await prisma.user.update({
+			where: { id: createdUserId },
+			data: { isMaster: true },
+		})
+
+		const loginResponse = await request(server)
+			.post('/login')
+			.send({
+				email: userCredentials.email,
+				password: userCredentials.password,
+				companyId: company.id,
+			})
+
+		masterToken = loginResponse.body.token
+
+		const regularUserCredentials = {
+			name: 'Regular User Test',
+			email: 'regulartest_company@example.com',
+			password: 'Test123@password',
+			phone: '+5511988888889',
+		}
+
+		await request(server)
+			.post('/users')
+			.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
+			.set('x-company-id', String(company.id))
+			.send(regularUserCredentials)
+
+		const regularLoginResponse = await request(server)
+			.post('/login')
+			.send({
+				email: regularUserCredentials.email,
+				password: regularUserCredentials.password,
+				companyId: company.id,
+			})
+
+		normalToken = regularLoginResponse.body.token
 	})
 
 	afterAll(async () => {
@@ -57,8 +113,7 @@ describe('CompanyController (E2E)', () => {
 
 			const response = await request(server)
 				.put('/companies')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', String(company.id))
+				.set('Authorization', `Bearer ${normalToken}`)
 				.send(updatedCompanyData)
 
 			delete (updatedCompanyData as any).countryCode
@@ -89,25 +144,18 @@ describe('CompanyController (E2E)', () => {
 			})
 		})
 
-		it('should not be able to update a company if it does not exist', async () => {
+		it('should not be able to update a company without a valid token', async () => {
 			const response = await request(server)
 				.put('/companies')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', '999999')
 				.send(companyData)
 
-			expect(response.status).toBe(404)
-			expect(response.body).toMatchObject({
-				message: 'Empresa não encontrada.',
-				statusCode: 404,
-			})
+			expect(response.status).toBe(401)
 		})
 
 		it('should not be able to update a company if the country does not exist', async () => {
 			const response = await request(server)
 				.put('/companies')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', String(company.id))
+				.set('Authorization', `Bearer ${normalToken}`)
 				.send({
 					...companyData,
 					countryCode: 'FO',
@@ -136,8 +184,7 @@ describe('CompanyController (E2E)', () => {
 
 			const response = await request(server)
 				.put('/companies')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', String(company.id))
+				.set('Authorization', `Bearer ${normalToken}`)
 				.send({
 					...companyData,
 					taxId: otherCompanyData.taxId,
@@ -166,8 +213,7 @@ describe('CompanyController (E2E)', () => {
 
 			const response = await request(server)
 				.put('/companies')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', String(company.id))
+				.set('Authorization', `Bearer ${normalToken}`)
 				.send({
 					...companyData,
 					email: otherCompanyData.email,
@@ -185,8 +231,7 @@ describe('CompanyController (E2E)', () => {
 		it('should be able to update a company status', async () => {
 			const response = await request(server)
 				.patch('/companies/status')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', String(company.id))
+				.set('Authorization', `Bearer ${normalToken}`)
 				.send({ status: 'active' })
 
 			expect(response.status).toBe(200)
@@ -203,18 +248,12 @@ describe('CompanyController (E2E)', () => {
 			expect(companyInDb?.status).toBe('active')
 		})
 
-		it('should not be able to update a company status if it does not exist', async () => {
+		it('should not be able to update a company status without a valid token', async () => {
 			const response = await request(server)
 				.patch('/companies/status')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', '999999')
 				.send({ status: 'active' })
 
-			expect(response.status).toBe(404)
-			expect(response.body).toMatchObject({
-				message: 'Empresa não encontrada.',
-				statusCode: 404,
-			})
+			expect(response.status).toBe(401)
 		})
 	})
 
@@ -222,8 +261,7 @@ describe('CompanyController (E2E)', () => {
 		it('should be able to find my company', async () => {
 			const response = await request(server)
 				.get('/companies/my-company')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', String(company.id))
+				.set('Authorization', `Bearer ${normalToken}`)
 
 			const expectedData = { ...companyData }
 			delete (expectedData as any).countryCode
@@ -243,16 +281,48 @@ describe('CompanyController (E2E)', () => {
 			})
 		})
 
-		it('should not be able to find my company if it does not exist', async () => {
+		it('should not be able to find my company without a valid token', async () => {
 			const response = await request(server)
 				.get('/companies/my-company')
-				.set('Authorization', `Bearer ${env.MASTER_LOCAL_TESTS_KEY}`)
-				.set('x-company-id', '999999')
 
-			expect(response.status).toBe(404)
+			expect(response.status).toBe(401)
+		})
+	})
+
+	describe('Access Control for Non-Master Users', () => {
+		it('should not be able to access master-only routes (e.g. GET /companies/:id) if user is not master', async () => {
+			const nonMasterCredentials = {
+				name: 'Regular User',
+				email: 'regular@example.com',
+				password: 'Test123@password',
+				phone: '+5511988888888',
+			}
+
+			await request(server)
+				.post('/users')
+				.set('Authorization', `Bearer ${masterToken}`)
+				.set('x-company-id', String(company.id))
+				.send(nonMasterCredentials)
+
+			const loginResponse = await request(server)
+				.post('/login')
+				.send({
+					email: nonMasterCredentials.email,
+					password: nonMasterCredentials.password,
+					companyId: company.id,
+				})
+
+			const localNormalToken = loginResponse.body.token
+
+			const response = await request(server)
+				.get(`/companies/${company.id}`)
+				.set('Authorization', `Bearer ${localNormalToken}`)
+				.set('x-company-id', String(company.id))
+
+			expect(response.status).toBe(401)
 			expect(response.body).toMatchObject({
-				message: 'Empresa não encontrada.',
-				statusCode: 404,
+				message: 'Unauthorized access',
+				statusCode: 401,
 			})
 		})
 	})

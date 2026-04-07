@@ -22,7 +22,7 @@ export interface CompanyEntityProps {
 	address: CompanyAdress
 	city: string
 	state: string
-	zip: ZipCode
+	zip?: ZipCode
 	countryId: number
 	taxId: TaxId
 	description?: CompanyDescription
@@ -66,8 +66,8 @@ export class CompanyEntity extends Entity<CompanyEntityProps> {
 		return this.props.state
 	}
 
-	public get zip(): string {
-		return this.props.zip.value
+	public get zip(): string | undefined {
+		return this.props.zip?.value
 	}
 
 	public get countryId(): number {

@@ -1,5 +1,4 @@
 import { Email } from '@shared/domain/value-objects/email'
-import { Entity } from '@shared/domain/base/entity'
 import { Password } from '../../../../shared/domain/value-objects/password'
 import { UniqueEntityId } from '@shared/domain/value-objects/unique-entity-id'
 import { Phone } from '@/core/shared/domain/value-objects/phone'
@@ -9,6 +8,8 @@ import { OldPasswordInvalidError } from '../errors/old-password-invalid'
 import { SessionStatus } from '@/core/shared/domain/constants/user/user-session-status.enum'
 import { UserStatus } from '@/core/shared/domain/constants/user/user-status.enum'
 import { CompanyEntity } from '@/core/contexts/company/domain/entities/company.entity'
+import { AggregateRoot } from '@/core/shared/domain/base/aggregate-root'
+import { UserLoggedIn } from '../events/user-logged-in.event'
 
 interface UpdatePasswordEntityProps {
 	hasher: Hasher
@@ -20,6 +21,7 @@ export interface UserEntityProps {
 	id?: number
 	name: string
 	email: Email
+	isMaster?: boolean
 	password?: Password
 	companyId: number
 	company?: CompanyEntity
@@ -30,7 +32,7 @@ export interface UserEntityProps {
 	updatedAt?: Date
 }
 
-export class UserEntity extends Entity<UserEntityProps> {
+export class UserEntity extends AggregateRoot<UserEntityProps> {
 	public get uuid(): string {
 		return this.id.value
 	}
@@ -83,6 +85,10 @@ export class UserEntity extends Entity<UserEntityProps> {
 		return this.props.phone?.value || ''
 	}
 
+	public get isMaster(): boolean {
+		return this.props.isMaster ?? false
+	}
+
 	public get createdAt(): Date {
 		return this.props.createdAt || new Date()
 	}
@@ -114,6 +120,10 @@ export class UserEntity extends Entity<UserEntityProps> {
 		}
 
 		this.props.password = await Password.create(newPassword, hasher)
+	}
+
+	public recordLogin() {
+		this.addDomainEvent(new UserLoggedIn({ userUuid: this.id.value, companyId: this.companyId, sessionStatus: SessionStatus.ONLINE }))
 	}
 
 	public static create(

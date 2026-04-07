@@ -37,7 +37,7 @@ interface UpdateCompanyUseCaseRequest {
 	phone?: string
 	taxId: string
 	address: string
-	zip: string
+	zip?: string
 	city: string
 	state: string
 	description?: string
@@ -72,7 +72,7 @@ export class UpdateCompanyUseCase {
 		private readonly countryRepository: CountryRepository,
 		private readonly taxIdValidator: TaxIdValidator,
 		private readonly zipCodeValidator: ZipCodeValidator,
-	) {}
+	) { }
 
 	public async execute(
 		props: UpdateCompanyUseCaseRequest,
@@ -123,13 +123,13 @@ export class UpdateCompanyUseCase {
 				address: props.address
 					? CompanyAdress.create(props.address)
 					: undefined,
-				zip: ZipCode.create(
+				zip: props.zip ? ZipCode.create(
 					{
 						value: props.zip,
 						countryCode: countryFromCode.iso2,
 					},
 					this.zipCodeValidator,
-				),
+				) : undefined,
 				taxId: TaxId.create(
 					{
 						code: props.taxId,

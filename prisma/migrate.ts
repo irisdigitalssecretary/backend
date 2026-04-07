@@ -1,10 +1,16 @@
 import { Umzug, JSONStorage } from 'umzug'
 import { PrismaClient } from '@prisma/client'
+import { env } from '../src/core/shared/infra/config/env-validation.js'
+import { PrismaPg } from "@prisma/adapter-pg"
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+	log: ['query', 'error', 'warn'],
+	adapter: new PrismaPg({ connectionString: env.DATABASE_URL })
+})
+
 const command = process.argv[2] || 'up'
 
-const isTestEnvironment = process.env.APP_ENV === 'test'
+const isTestEnvironment = env.APP_ENV === 'test'
 
 const umzug = new Umzug({
 	migrations: {

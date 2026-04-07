@@ -11,6 +11,7 @@ import { UpdateUserStatusUseCase } from './application/use-cases/update-user-sta
 import { DeleteUserByIdUseCase } from './application/use-cases/delete-user-by-id.use-case'
 import { FindUserByUuidUseCase } from './application/use-cases/find-user-by-uuid.use-case'
 import { FindManyUsersByOffsetPaginationUseCase } from './application/use-cases/find-many-users-by-offset-pagination.use-case'
+import { UpdateUserSessionStatusHandler } from './application/event-handlers/update-user-session-status.handler'
 
 @Module({
 	controllers: [UserController],
@@ -22,6 +23,7 @@ import { FindManyUsersByOffsetPaginationUseCase } from './application/use-cases/
 		DeleteUserByIdUseCase,
 		FindUserByUuidUseCase,
 		FindManyUsersByOffsetPaginationUseCase,
+		UpdateUserSessionStatusHandler,
 		{
 			provide: UserRepository,
 			useClass: PrismaUserRepository,
@@ -32,4 +34,4 @@ import { FindManyUsersByOffsetPaginationUseCase } from './application/use-cases/
 		},
 	],
 })
-export class UserModule {}
+export class UserModule { }
